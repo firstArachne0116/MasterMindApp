@@ -1,0 +1,117 @@
+{
+  "project_info": {
+    "project_number": "651695572708",
+    "firebase_url": "https://master-mind-60620.firebaseio.com",
+    "project_id": "master-mind-60620",
+    "storage_bucket": "master-mind-60620.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651695572708:android:7a11d40ab31363b0108ef1",
+        "android_client_info": {
+          "package_name": "com.dataquest.mastermind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "651695572708-dh21j2apej4d4bbjq2qj2p0udp5jtfn1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dataquest.mastermind",
+            "certificate_hash": "3174b91ccd15bdb4b423329f1a26eea9c395c63f"
+          }
+        },
+        {
+          "client_id": "651695572708-5p25rv7j7qeq64efe15e5l0ldv00sjk9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATSJn3n2qenicDsnjMvUezq4O7VjhiBiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651695572708-5p25rv7j7qeq64efe15e5l0ldv00sjk9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "651695572708-1orjm5f8qbsor88cgk9dndim27oac0a1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dataquest.mastermind",
+                "app_store_id": "1540425859"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651695572708:android:85c0a84ca7d0e366108ef1",
+        "android_client_info": {
+          "package_name": "com.master_mind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "651695572708-o4utkhdvdllvr419j2jsv66socnafi9v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.master_mind",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "651695572708-g7npe0vsqmd1jq8tu5b3o40d4i4g5e38.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.master_mind",
+            "certificate_hash": "3174b91ccd15bdb4b423329f1a26eea9c395c63f"
+          }
+        },
+        {
+          "client_id": "651695572708-3egmls4g8khlcui4kes8r6ogrmiavk5t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.master_mind",
+            "certificate_hash": "3e51f2f23954a082cbae6451af3ea4badf8e18d0"
+          }
+        },
+        {
+          "client_id": "651695572708-5p25rv7j7qeq64efe15e5l0ldv00sjk9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATSJn3n2qenicDsnjMvUezq4O7VjhiBiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651695572708-5p25rv7j7qeq64efe15e5l0ldv00sjk9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "651695572708-1orjm5f8qbsor88cgk9dndim27oac0a1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dataquest.mastermind",
+                "app_store_id": "1540425859"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

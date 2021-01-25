@@ -1,0 +1,71 @@
+import {Dimensions} from 'react-native';
+const {width, height} = Dimensions.get('window');
+
+const theme = {
+  wh20: {
+    width: 20,
+    height: 20,
+  },
+  fonts: {
+    light: 'Gilroy-Light',
+    extraBold: 'Gilroy-ExtraBold',
+    redHatNormal: 'RedHatDisplay-Regular',
+    redHatMedium: 'RedHatDisplay-Medium',
+    redHatBold: 'RedHatDisplay-Bold',
+    redHatExtraBold: 'RedHatDisplay-Black',
+  },
+  ml11: {
+    marginLeft: 11,
+  },
+  PB35: {
+    paddingBottom: 35,
+  },
+  white: {
+    color: '#FFF',
+  },
+  colors: {
+    black: '#000000',
+    black1: '#333333',
+    white: '#FFFFFF',
+    lightWhite: '#f7f7f7',
+    sky: '#22d7ff',
+    sky1: '#56E8FF',
+    blue: '#3a6ec1',
+    blue1: '#285296',
+    blue2: '#2478ff',
+    blue3: '#2289ff',
+    blue4: '#0E60FF',
+    grey: '#666666',
+    grey1: '#aaaaaa',
+    grey2: '#888888',
+    grey3: '#747474',
+    grey4: '#707070',
+    grey5: '#424242',
+    grey6: '#f2f7ff',
+    grey7: '#dddddd',
+    red: '#1c4966',
+    red1: '#ff1a00',
+    red2: '#ff0000',
+    red3: '#f90000',
+    pink: '#fa448a',
+    pink1: '#ee8eff',
+    pink2: '#ff7192',
+    pink3: '#8A329E',
+    pink4: '#ff509e',
+    orange1: '#fca356',
+    orange2: '#fe6738',
+    orange3: '#fca800',
+    orange4: '#ff6f00',
+    orange5: '#fd5900',
+    orange6: '#ffde00',
+    green: '#34c253',
+    yellow1: '#F7E5B2',
+    yellow2: '#EAC269',
+    yellow3: '#fdb100',
+    brown: '#9b5f1a',
+  },
+  SCREENWIDTH: width,
+  SCREENHEIGHT: height,
+};
+
+export default theme;
