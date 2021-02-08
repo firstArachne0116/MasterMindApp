@@ -3,7 +3,7 @@ import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {scale, theme, images} from '../../constants/index.js';
 
-export const GameBoxHeader = ({navigation, params}) => (
+export const GameBoxHeader = ({navigation, params, turnId, me}) => (
   <View style={styles.content}>
     <View style={styles.header}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -15,7 +15,9 @@ export const GameBoxHeader = ({navigation, params}) => (
         colors={[theme.colors.pink3, theme.colors.pink4]}
         style={styles.gradient}>
         <Image source={images.uk} style={styles.countryFlag} />
-        <Text style={styles.turnText}>Opponent's turn</Text>
+        <Text style={styles.turnText}>
+          {turnId === me.uid ? 'Your turn to make a move' : "Opponent's turn"}
+        </Text>
       </LinearGradient>
       <TouchableOpacity
         onPress={() => navigation.navigate('ChatConversion', {...params})}>

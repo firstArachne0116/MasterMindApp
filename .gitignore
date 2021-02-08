@@ -40,7 +40,7 @@ buck-out/
 \.buckd/
 *.keystore
 !debug.keystore
-
+/credentials
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the

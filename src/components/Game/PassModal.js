@@ -3,12 +3,7 @@ import {TouchableOpacity, Text, StyleSheet, Image, View} from 'react-native';
 import Modal from 'react-native-modal';
 import LinearGradient from 'react-native-linear-gradient';
 import {images, scale, theme} from '../../constants';
-const PassModal = ({isModalVisible, toggleModalVisibility}) => {
-  const closemodal = () => {
-    console.lo;
-    toggleModalVisibility();
-  };
-
+const PassModal = ({isModalVisible, handlePass, handleCancel}) => {
   return (
     <Modal
       isVisible={isModalVisible}
@@ -22,12 +17,12 @@ const PassModal = ({isModalVisible, toggleModalVisibility}) => {
         <LinearGradient
           colors={[theme.colors.sky, theme.colors.sky]}
           style={styles.gradient}>
-          <TouchableOpacity onPress={() => closemodal()}>
+          <TouchableOpacity onPress={() => handlePass()}>
             <Text style={styles.gradientText}>Yes, Pass</Text>
           </TouchableOpacity>
         </LinearGradient>
 
-        <TouchableOpacity onPress={() => closemodal()}>
+        <TouchableOpacity onPress={() => handleCancel()}>
           <Text style={styles.cancel}>No, Cancel</Text>
         </TouchableOpacity>
       </View>

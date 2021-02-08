@@ -1,11 +1,9 @@
 import React from 'react';
-import {StyleSheet, View, Text, TouchableHighlight} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import LinearGradient from 'react-native-linear-gradient';
 
-const getClassName = (w) => {
-  if (w === -1) {
-    return styles.starTile;
-  }
+const getUnFillClassName = (w) => {
   if (w === 1) {
     return styles.dlTile;
   }
@@ -18,146 +16,163 @@ const getClassName = (w) => {
   if (w === 4) {
     return styles.twTile;
   }
+  if (w === 5) {
+    return styles.qlTile;
+  }
   return styles.tile;
 };
 
-export const Tile = ({tile, onSelectTile}) => {
+export const Tile = ({tile, onSelectTile, onReturnCard, success}) => {
   return (
-    <TouchableHighlight
-      onPress={() => onSelectTile(tile)}
-      underlayColor="transparent">
+    <View underlayColor="transparent">
       <>
         {!tile.fill && (
-          <View style={getClassName(tile.w)}>
+          <TouchableOpacity
+            style={getUnFillClassName(tile.w)}
+            onPress={() => onSelectTile(tile)}>
             {tile.id === 112 ? (
-              <AntDesign name="star" style={styles.gameboxTitle} />
+              <AntDesign name="star" style={styles.starTile} />
             ) : (
               <Text style={styles.gameboxTitle}>{tile.letter}</Text>
             )}
-          </View>
+          </TouchableOpacity>
         )}
-        {tile.fill && tile.success === undefined && (
-          <View style={styles.fillTile}>
+        {tile.fill && tile.status === 'board' && (
+          <LinearGradient
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            colors={['#F6E5B0', '#E6BC5B']}
+            style={[styles.tile, styles.fillTile]}>
+            <Text style={[styles.fillTitle, styles.value]}>{tile.value}</Text>
+            <Text style={styles.fillTitle}>{tile.letter}</Text>
+          </LinearGradient>
+        )}
+        {tile.fill && tile.status === 'new' && (
+          <View style={[styles.tile, styles.newTile]}>
+            <Text style={[styles.fillTitle, styles.value]}>{tile.value}</Text>
             <Text style={styles.fillTitle}>{tile.letter}</Text>
           </View>
         )}
-        {tile.success && tile.success !== undefined && tile.fill && (
-          <View style={styles.successTile}>
-            <Text style={styles.colorTitle}>{tile.letter}</Text>
-          </View>
-        )}
-        {!tile.success && tile.success !== undefined && tile.fill && (
-          <View style={styles.dangerTile}>
-            <Text style={styles.colorTitle}>{tile.letter}</Text>
-          </View>
-        )}
+        {tile.fill &&
+          tile.status !== 'board' &&
+          tile.status !== 'new' &&
+          success && (
+            <TouchableOpacity
+              style={[styles.tile, styles.cardTile]}
+              onPress={() => onReturnCard(tile)}>
+              <Text style={[styles.fillTitle, styles.value]}>{tile.value}</Text>
+              <Text style={styles.fillTitle}>{tile.letter}</Text>
+            </TouchableOpacity>
+          )}
+        {tile.fill &&
+          tile.status !== 'board' &&
+          tile.status !== 'new' &&
+          !success && (
+            <TouchableOpacity
+              style={[styles.tile, styles.dangerTile]}
+              onPress={() => onReturnCard(tile)}>
+              <Text style={[styles.dangerTitle, styles.value]}>
+                {tile.value}
+              </Text>
+              <Text style={styles.dangerTitle}>{tile.letter}</Text>
+            </TouchableOpacity>
+          )}
       </>
-    </TouchableHighlight>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    marginTop: 50,
-    borderRadius: 5,
-    paddingTop: 5,
-    paddingBottom: 1,
-    paddingHorizontal: 3,
-    marginHorizontal: 10,
-    flex: 1,
-  },
-  innerWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
   dwTile: {
     height: 22,
     width: 22,
-    backgroundColor: '#ffa200',
-    paddingLeft: 3,
+    backgroundColor: '#21AFCE',
+    textAlign: 'center',
+    alignItems: 'center',
     paddingTop: 2,
     borderRadius: 5,
   },
   twTile: {
     height: 22,
     width: 22,
-    backgroundColor: '#ff78af',
-    paddingLeft: 3,
+    backgroundColor: '#FC5757',
+    textAlign: 'center',
+    alignItems: 'center',
     paddingTop: 2,
     borderRadius: 5,
   },
   dlTile: {
     height: 22,
     width: 22,
-    backgroundColor: '#6ec94e',
-    paddingLeft: 3,
+    backgroundColor: '#E8A368',
+    textAlign: 'center',
+    alignItems: 'center',
     paddingTop: 2,
     borderRadius: 5,
   },
   tlTile: {
     height: 22,
     width: 22,
-    backgroundColor: '#b7a6fe',
-    paddingLeft: 3,
+    backgroundColor: '#6F4CE5',
+    textAlign: 'center',
+    alignItems: 'center',
+    paddingTop: 2,
+    borderRadius: 5,
+  },
+  qlTile: {
+    height: 22,
+    width: 22,
+    backgroundColor: '#139B78',
+    textAlign: 'center',
+    alignItems: 'center',
     paddingTop: 2,
     borderRadius: 5,
   },
   starTile: {
-    backgroundColor: '#fe6738',
-    height: 22,
-    width: 22,
-    paddingHorizontal: 5,
-    paddingTop: 4,
-    borderRadius: 5,
-  },
-  fillTile: {
-    backgroundColor: '#EAC269',
-    height: 22,
-    width: 22,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    color: '#FFCB00',
+    textTransform: 'uppercase',
+    fontSize: 18,
   },
   fillTitle: {
     textTransform: 'uppercase',
-    fontSize: 20,
+    fontSize: 14,
     color: '#9b5f1a',
-    fontWeight: 'bold',
   },
-  colorTitle: {
+  newTile: {
+    backgroundColor: '#A3FF00',
+  },
+  cardTile: {
+    backgroundColor: '#FFD819',
+  },
+  dangerTitle: {
     textTransform: 'uppercase',
-    fontSize: 20,
+    fontSize: 14,
     color: '#FFF',
-    fontWeight: 'bold',
   },
   successTile: {
     backgroundColor: 'green',
-    height: 22,
-    width: 22,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   dangerTile: {
     backgroundColor: '#f90000',
-    height: 22,
-    width: 22,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   tile: {
     height: 22,
     width: 22,
     backgroundColor: '#f3f2f2',
     borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
   },
   gameboxTitle: {
     color: '#fff',
     textTransform: 'uppercase',
     fontSize: 12,
+  },
+  value: {
+    fontSize: 7,
+    top: 0,
+    left: 2,
+    position: 'absolute',
   },
 });

@@ -91,10 +91,12 @@ class SessionPlayed extends Component {
     const newRoom = currentUser.uid + '_' + user.uid;
 
     if (!roomId) {
-      await firestore().collection('messages').doc(newRoom).set({id: newRoom});
+      await firestore().collection('messages').doc(newRoom).set({
+        id: newRoom,
+      });
       navigation.navigate('Versus', {...user, roomId: newRoom});
     } else {
-      navigation.navigate('Versus', {...user, roomId});
+      navigation.navigate('ActiveSession', {...user, roomId});
     }
   };
 

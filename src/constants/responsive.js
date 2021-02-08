@@ -11,14 +11,19 @@ const moderatedScale = (size, factor = 0.5) =>
   size + (scale(size) - size) * factor;
 
 const convertName = (name) => {
+  let result = '';
   if (name) {
     let arr = name.split(' ');
     if (arr.length > 1) {
-      return arr[0] + ' ' + arr[1].charAt(0);
+      result = arr[0] + ' ' + arr[1].charAt(0);
+    } else {
+      result = arr[0];
     }
-    return arr[0];
   }
-  return;
+  if (result.length > 10) {
+    result = result.substr(0, 10);
+  }
+  return result;
 };
 
 const getPlatformURI = async (imagePath) => {

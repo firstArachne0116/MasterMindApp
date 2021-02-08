@@ -28,7 +28,7 @@ const baseConfig = {
 3. Open `android/app/build.gradle`. Manually update the `versionName` string:
 ```
 defaultConfig {
-    applicationId "com.mastermind"
+    applicationId "com.dataquest.mastermind"
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
     versionCode 10
@@ -39,7 +39,7 @@ defaultConfig {
 ```
 <manifest 
   xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.mastermind"
+  package="com.dataquest.mastermind"
   android:versionCode="10" 
   android:versionName="v0.1.1 build 10">
 ```

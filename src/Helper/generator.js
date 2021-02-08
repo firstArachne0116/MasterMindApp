@@ -8,7 +8,7 @@ const defineMatrix = () => {
     for (let j = 0; j < 15; j++) {
       let id = i * 15 + j;
       const point = tile.COLOR_TILE_BOARD.find(
-        (item) => item.col === i && item.row === j,
+        (item) => item.col === j && item.row === i,
       );
 
       if (point) {
@@ -34,44 +34,16 @@ const generatorNewCard = () => {
   return {letter: tile.CHARS[index], w: tile.WEIGHTS[weight], selected: false};
 };
 
-const getNewWord = async () => {
-  let tempWord = [];
-  const firstCard = await generatorNewCard();
-  const keyDic = await dictionary[firstCard.letter.toLowerCase()].filter(
-    (word) => word.length < 7,
-  );
-
-  const keyDicIndex = Math.floor(Math.random() * keyDic.length);
-  const word = keyDic[keyDicIndex];
-  const wordArray = word ? word.split('') : [];
-
-  for (let i = 0; i < 7; i++) {
-    if (i < wordArray.length) {
-      tempWord.push({
-        letter: wordArray[i].toUpperCase(),
-        w: tile.WEIGHTS[Math.floor(Math.random() * 26)],
-        selected: false,
-      });
-    } else {
-      tempWord.push(generatorNewCard());
-    }
-  }
-  console.log('word', word);
-  return tempWord
-    .sort(() => Math.random() - 0.5)
-    .map((item, index) => ({...item, id: index}));
-};
-
-const isAvailableWord = async (word, list) => {
-  const findWord = await list.find((item) => item === word.toLowerCase());
+const isAvailableWord = (word, list) => {
+  const findWord = list.find((item) => item === word.toLowerCase());
   if (findWord) {
     return true;
   }
   return false;
 };
 
-const getAvailableWords = async (char) => {
-  const filterDic = await dictionary[char.toLowerCase()];
+const getAvailableWords = (char) => {
+  const filterDic = dictionary[char.toLowerCase()];
   return filterDic;
 };
 
@@ -101,7 +73,6 @@ const getWeight = async (word, tiles) => {
 export {
   defineMatrix,
   generatorNewCard,
-  getNewWord,
   isAvailableWord,
   getAvailableWords,
   getWeight,

@@ -7,6 +7,7 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "build": "babel src -d lib",
+    "bundle-android": "react-native bundle --entry-file index.js  --platform android --dev false --bundle-output ./android/app/src/main/assets/index.android.bundle --assets-dest ./android/app/src/main/res",
     "test": "jest",
     "lint": "eslint . --quiet",
     "incrementBuild": "react-native-version -b",

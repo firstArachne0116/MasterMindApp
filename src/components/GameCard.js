@@ -6,13 +6,13 @@ const GameCard = (props) => {
   const {title, availableText, onPress, buttonText} = props;
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
+      <TouchableOpacity style={styles.card} onPress={onPress}>
         <Image source={images.trophy} style={styles.image} />
         <View style={styles.textContainer}>
           <Text style={styles.instruction}>{title}</Text>
           <Text style={styles.availableText}>{availableText}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.playButton} onPress={onPress}>
         <Text style={styles.playButtonText}>{buttonText}</Text>
       </TouchableOpacity>
