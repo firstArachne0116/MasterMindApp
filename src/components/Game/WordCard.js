@@ -43,7 +43,7 @@ export const WordCard = ({cards, onSelectCard, onReplaceCard}) => {
               <TouchableHighlight
                 onPress={() => onSelectCard(char)}
                 underlayColor="transparent">
-                {!char.row ? (
+                {char.row === undefined ? (
                   <View style={styles.letterView}>
                     <Text style={styles.letterIndex}>
                       {char.letter ? char.value : ''}

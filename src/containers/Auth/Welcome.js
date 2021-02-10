@@ -32,17 +32,20 @@ class Welcome extends Component {
 
   componentDidMount() {
     this.init();
+    this.props.navigation.addListener('focus', () => {
+      this.init();
+    });
   }
 
-  init = async () => {
-    await this.setState({isLoadingScreen: true});
-    const user = await auth().currentUser;
+  init = () => {
+    this.setState({isLoadingScreen: true});
+    const user = auth().currentUser;
 
     if (user) {
-      await this.props.navigation.navigate('NewGame');
+      this.props.navigation.navigate('Home');
       return;
     }
-    await GoogleSignin.configure({
+    GoogleSignin.configure({
       scopes: ['email'],
       webClientId:
         '651695572708-5p25rv7j7qeq64efe15e5l0ldv00sjk9.apps.googleusercontent.com',
@@ -109,7 +112,7 @@ class Welcome extends Component {
 
   setUsersData = async (userData, token) => {
     const {navigation} = this.props;
-    await auth()
+    auth()
       .signInWithCredential(token)
       .then(() => {
         const userRef = auth().currentUser;
@@ -136,24 +139,22 @@ class Welcome extends Component {
               firestore().collection('notifications').doc(userRef.uid).set(uid);
               firestore().collection('privacies').doc(userRef.uid).set(uid);
             }
+            navigation.navigate('Home', {isLoading: false});
           })
           .catch((err) => {
             console.log('Error getting documents', err);
           });
       });
-    await navigation.navigate('NewGame', {isLoading: false});
   };
 
   handleGoogle = async () => {
-    const {navigation} = this.props;
-
     try {
       await GoogleSignin.hasPlayServices();
       const {user, idToken} = await GoogleSignin.signIn();
       const googleCredential = await auth.GoogleAuthProvider.credential(
         idToken,
       );
-      await this.props.setUser({
+      this.props.setUser({
         email: user.email,
         name: user.name,
         register_type: 'google',
@@ -166,8 +167,7 @@ class Welcome extends Component {
         user_name: user.name,
         email: user.email,
       };
-      await this.setUsersData(userData, googleCredential);
-      await navigation.navigate('NewGame');
+      this.setUsersData(userData, googleCredential);
     } catch (error) {
       RenderAlert(error.message);
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {

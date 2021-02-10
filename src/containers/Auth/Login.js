@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {Component} from 'react';
 import {
   StyleSheet,
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import {connect} from 'react-redux';
 import {KeyboardAvoidingScrollView} from 'react-native-keyboard-avoiding-scroll-view';
@@ -164,11 +166,11 @@ class Login extends Component {
             </TouchableOpacity>
 
             <View style={styles.privacyView}>
-              <TouchableOpacity onPress={() => alert('Privacy Policy')}>
+              <TouchableOpacity onPress={() => Alert.alert('Privacy Policy')}>
                 <Text style={styles.privacy}>{'Private Policy'}</Text>
               </TouchableOpacity>
               <View style={styles.devider} />
-              <TouchableOpacity onPress={() => alert('Terms of Service')}>
+              <TouchableOpacity onPress={() => Alert.alert('Terms of Service')}>
                 <Text style={styles.privacy}>{'Terms of Service'}</Text>
               </TouchableOpacity>
             </View>

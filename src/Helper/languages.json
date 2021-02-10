@@ -1,0 +1,52 @@
+[
+  {
+    "name": "English(UK)",
+    "flag": "🇬🇧",
+    "code": "en"
+  },
+  {
+    "name": "German",
+    "flag": "🇩🇪",
+    "code": "de"
+  },
+  {
+    "name": "Bosnian",
+    "flag": "🇧🇦",
+    "code": "bo"
+  },
+  {
+    "name": "Croatian",
+    "flag": "🇭🇷",
+    "code": "hr"
+  },
+  {
+    "name": "Serbian",
+    "flag": "🇷🇸",
+    "code": "rs"
+  },
+  {
+    "name": "Cro-Se-Bo",
+    "flag": "",
+    "code": "csb"
+  },
+  {
+    "name": "Italian",
+    "flag": "🇮🇹",
+    "code": "it"
+  },
+  {
+    "name": "Spainish",
+    "flag": "🇪🇸",
+    "code": "es"
+  },
+  {
+    "name": "Polish",
+    "flag": "🇵🇱",
+    "code": "pl"
+  },
+  {
+    "name": "Russian",
+    "flag": "🇷🇺",
+    "code": "ru"
+  }
+]

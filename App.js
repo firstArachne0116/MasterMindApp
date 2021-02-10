@@ -25,7 +25,28 @@ import {
   Notification,
   PrivacySetting,
   AccountSettings,
+  Home,
+  SelectGameType,
+  SelectLanguage,
 } from './src/containers';
+
+import admob, {MaxAdContentRating} from '@react-native-firebase/admob';
+
+admob()
+  .setRequestConfiguration({
+    // Update all future requests suitable for parental guidance
+    maxAdContentRating: MaxAdContentRating.PG,
+
+    // Indicates that you want your content treated as child-directed for purposes of COPPA.
+    tagForChildDirectedTreatment: true,
+
+    // Indicates that you want the ad request to be handled in a
+    // manner suitable for users under the age of consent.
+    tagForUnderAgeOfConsent: true,
+  })
+  .then(() => {
+    // Request config successfully set!
+  });
 
 const Stack = createStackNavigator();
 
@@ -64,6 +85,9 @@ class App extends React.Component {
           <Stack.Screen name="Signup" component={Signup} />
           <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
           <Stack.Screen name="NewGame" component={NewGame} />
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="SelectGameType" component={SelectGameType} />
+          <Stack.Screen name="SelectLanguage" component={SelectLanguage} />
           <Stack.Screen
             name="SessionInvitation"
             component={SessionInvitation}

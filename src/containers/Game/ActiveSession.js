@@ -5,6 +5,8 @@ import {
   ImageBackground,
   Dimensions,
   SafeAreaView,
+  Platform,
+  Alert,
 } from 'react-native';
 import {scale, images} from '../../constants/index.js';
 import {defineMatrix} from '../../Helper/generator';
@@ -20,6 +22,20 @@ import {
 } from '../../components';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
+import firestore from '@react-native-firebase/firestore';
+import {
+  InterstitialAd,
+  AdEventType,
+  TestIds,
+} from '@react-native-firebase/admob';
+
+const adUnitIdPROD =
+  Platform.OS === 'android'
+    ? 'ca-app-pub-2121153401296954/6531125858'
+    : 'ca-app-pub-2121153401296954/7621023859';
+
+const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : adUnitIdPROD;
+let interstitial = null;
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
@@ -42,15 +58,35 @@ export default class ActiveSession extends Component {
       totalYou: 0,
       passedMe: 0,
       passedYou: 0,
+      adsLoaded: false,
     };
   }
   onTurnId = null;
   onTiles = null;
   onScore = null;
+  unsubscribeAdListener = null;
 
   componentDidMount() {
     const {roomId, uid} = this.props.route.params;
     const {me} = this.state;
+    const that = this;
+    interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+      requestNonPersonalizedAdsOnly: true,
+      keywords: ['fashion', 'clothing'],
+    });
+    this.unsubscribeAdListener = interstitial.onAdEvent((type) => {
+      console.log('ads', type);
+      switch (type) {
+        case AdEventType.LOADED:
+          that.setState({adsLoaded: true});
+          break;
+        case AdEventType.CLOSED:
+          that.setState({adsLoaded: false});
+          interstitial.load();
+          break;
+      }
+    });
+    interstitial.load();
 
     this.onTurnId = database()
       .ref(`board/${roomId}/turnId`)
@@ -113,11 +149,23 @@ export default class ActiveSession extends Component {
                 passedMe = data.passed;
               }
               if (data.win !== undefined) {
-                if (data.win) {
-                  this.props.navigation.navigate('GlobalRankList');
-                } else {
-                  this.props.navigation.goBack();
-                }
+                const finishMessages = [
+                  'Sorry, you lost the game.',
+                  'Withdrawed.',
+                  'Congratulation, you won the game.',
+                ];
+                Alert.alert(
+                  '',
+                  finishMessages[data.win + 1],
+                  [
+                    {
+                      text: 'OK',
+                      onPress: () =>
+                        this.props.navigation.navigate('GlobalRankList'),
+                    },
+                  ],
+                  {cancelable: false},
+                );
               }
             } else {
               youTotal = data.score;
@@ -161,6 +209,9 @@ export default class ActiveSession extends Component {
     }
     if (this.onScore) {
       database().ref(`board/${roomId}/score`).off('value', this.onScore);
+    }
+    if (this.unsubscribeAdListener) {
+      this.unsubscribeAdListener();
     }
   }
 
@@ -322,7 +373,7 @@ export default class ActiveSession extends Component {
     });
     let linked = false;
     for (let i = 0; i < cards.length; i++) {
-      if (cards[i].row) {
+      if (cards[i].row !== undefined) {
         for (let j = i + 1; j < cards.length; j++) {
           if (
             cards[j].row &&
@@ -353,6 +404,7 @@ export default class ActiveSession extends Component {
       return false;
     }
 
+    console.log('linked');
     let minRow = 15,
       minCol = 15,
       maxRow = -1,
@@ -391,7 +443,7 @@ export default class ActiveSession extends Component {
     let score = 0;
 
     cards.map((card) => {
-      if (card.row) {
+      if (card.row !== undefined) {
         let word = that.getVerticalWord(renderData, card);
         if (
           word.word.length > 1 &&
@@ -428,7 +480,14 @@ export default class ActiveSession extends Component {
   };
 
   handleSubmit = async () => {
-    const {roomId, uid} = this.props.route.params;
+    const {
+      roomId,
+      uid,
+      language,
+      type,
+      photoURL,
+      name,
+    } = this.props.route.params;
     const {
       tiles,
       bag,
@@ -444,6 +503,11 @@ export default class ActiveSession extends Component {
     } = this.state;
     if (turnId !== me.uid || !success) {
       return;
+    }
+    if (this.state.adsLoaded && type === 'unsigned') {
+      interstitial.show();
+    } else {
+      console.log(this.state.adsLoaded, type);
     }
     let totalScore = score;
     if (
@@ -486,8 +550,51 @@ export default class ActiveSession extends Component {
       oCards.map((card) => (remainScore += card.value));
       newScore[0].score = totalMe + totalScore + remainScore;
       newScore[1].score = totalYou - remainScore;
-      newScore[0].win = newScore[0].score >= newScore[1].score;
-      newScore[1].win = newScore[0].score < newScore[1].score;
+      newScore[0].win =
+        newScore[0].score > newScore[1].score
+          ? 1
+          : newScore[0].score === newScore[1].score
+          ? 0
+          : -1;
+      newScore[1].win =
+        newScore[0].score < newScore[1].score
+          ? 1
+          : newScore[0].score === newScore[1].score
+          ? 0
+          : -1;
+
+      firestore().collection('messages').doc(roomId).delete();
+      firestore().collection('users').doc(me.uid).collection('score').add({
+        score: newScore[0].score,
+        win: newScore[0].win,
+        language,
+        date: new Date(),
+      });
+    } else {
+      firestore()
+        .collection('messages')
+        .doc(roomId)
+        .set({
+          id: roomId,
+          language,
+          type,
+          updated_at: new Date(),
+          end_at: new Date(new Date().getTime() + 48 * 3600 * 1000),
+          players: [
+            {
+              uid: me.uid,
+              full_name: me.displayName,
+              photoURL: me.photoURL,
+              status: 'Your move',
+            },
+            {
+              uid: uid,
+              full_name: name,
+              photoURL,
+              status: 'Pending',
+            },
+          ],
+        });
     }
     database()
       .ref(`board/${roomId}/tiles`)

@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {Component} from 'react';
 import {
   StyleSheet,
@@ -8,26 +9,27 @@ import {
   ImageBackground,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {scale, theme, images} from '../../constants/index.js';
 import {ScreenContainer, SocialMedia} from '../../components';
+import firestore from '@react-native-firebase/firestore';
+import database from '@react-native-firebase/database';
+import auth from '@react-native-firebase/auth';
 
 class SessionInvitation extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
-      user_id: 0,
-      contacts: null,
-      user_name: 'you',
-      menu_bar: false,
-
       inviteList: [
         {
           title: 'Invite your\nMasterMIND friend',
           icon: images.girl,
           cardImage: images.inviteFriend,
+          handler: () => {
+            Alert.alert('Please search and select your MasterMIND friend.');
+          },
         },
         {
           title: 'Invite your\nFacebook friend',
@@ -53,14 +55,128 @@ class SessionInvitation extends Component {
           title: 'Invite random\nMasterMIND user',
           icon: images.team,
           cardImage: images.inviteRandomUser,
+          handler: this.inviteRandomUser,
         },
       ],
+      friends: [],
+      selectedFriend: null,
+      searchTxt: '',
     };
+    this.timerID = null;
   }
 
+  getRoomID = async (uid) => {
+    let list = [];
+    let name = '';
+    const currentUser = auth().currentUser;
+    const room1 = uid + '_' + currentUser.uid;
+    const room2 = currentUser.uid + '_' + uid;
+    await firestore()
+      .collection('messages')
+      .get()
+      .then((snapshot) => {
+        list = snapshot.docs.map((doc) => doc.id);
+      });
+    if (list.includes(room1)) {
+      name = room1;
+    } else if (list.includes(room2)) {
+      name = room2;
+    }
+
+    return name;
+  };
+
+  inviteFriend = async () => {
+    const {selectedFriend} = this.state;
+    const {language, type} = this.props.route.params;
+    const {navigation} = this.props;
+    if (selectedFriend) {
+      const roomId = await this.getRoomID(selectedFriend.uid);
+      const currentUser = auth().currentUser;
+      const newRoom = currentUser.uid + '_' + selectedFriend.uid;
+      if (roomId) {
+        Alert.alert('', 'You already have a match with this player.');
+      } else {
+        firestore()
+          .collection('messages')
+          .doc(newRoom)
+          .set({
+            id: newRoom,
+            language,
+            type,
+            created_at: new Date(),
+            updated_at: new Date(),
+            end_at: new Date(new Date().getTime() + 48 * 3600 * 1000),
+            players: [
+              {
+                uid: currentUser.uid,
+                full_name: currentUser.displayName,
+                photoURL: currentUser.photoURL,
+                status: 'Invited',
+              },
+              {
+                uid: selectedFriend.uid,
+                full_name: selectedFriend.full_name,
+                photoURL: selectedFriend.photoURL,
+                status: 'Waiting',
+              },
+            ],
+          })
+          .then(() => {
+            database().ref(`board/${newRoom}/tiles`).remove();
+            database().ref(`board/${newRoom}/turnId`).remove();
+            Alert.alert(
+              '',
+              'Successfully invited your friend.',
+              [{text: 'OK', onPress: () => navigation.navigate('Home')}],
+              {cancelable: false},
+            );
+          });
+      }
+    }
+  };
+
+  inviteRandomUser = () => {};
+
+  handleSearchFriend = (txt) => {
+    const user = auth().currentUser;
+    const that = this;
+    firestore()
+      .collection('users')
+      .get()
+      .then((querySnapshot) => {
+        const friends = querySnapshot.docs
+          .map((item) => item._data)
+          .filter((item) => item.user_name.toLowerCase().includes(txt));
+        that.setState({
+          friends: friends.filter((item) => item.uid !== user.uid),
+          selectedFriend: friends.find(
+            (item) => item.uid === that.state.selectedFriend,
+          )
+            ? that.state.selectedFriend
+            : null,
+        });
+      });
+  };
+
+  handleChangeSearch = (txt) => {
+    const that = this;
+    if (this.timerID) {
+      clearTimeout(this.timerID);
+    }
+    this.timerID = setTimeout(() => {
+      that.timerID = null;
+      that.handleSearchFriend(txt);
+    }, 1000);
+    this.setState({searchTxt: txt});
+  };
+
+  selectFriend = (ele) => {
+    this.setState({selectedFriend: ele});
+  };
+
   render() {
-    const {naviagtion} = this.props;
-    const {inviteList} = this.state;
+    const {inviteList, searchTxt, selectedFriend} = this.state;
 
     return (
       <ScreenContainer>
@@ -81,46 +197,113 @@ class SessionInvitation extends Component {
               <TextInput
                 style={styles.input}
                 underlineColorAndroid="transparent"
-                //onChangeText={search}
+                onChangeText={(txt) => this.handleChangeSearch(txt)}
                 placeholder="Search"
               />
             </View>
           </ImageBackground>
 
-          <View style={{marginTop: 29}}>
-            {inviteList.map((item, index) => {
-              return (
+          {searchTxt ? (
+            <>
+              <View style={{marginTop: 29}}>
+                {this.state.friends.map((elem, i) => {
+                  return (
+                    <TouchableOpacity
+                      style={{marginHorizontal: 30, marginBottom: 20}}
+                      key={'user' + i.toString()}
+                      onPress={() => this.selectFriend(elem)}>
+                      <View
+                        style={[
+                          styles.box,
+                          {
+                            backgroundColor:
+                              selectedFriend && elem.uid === selectedFriend.uid
+                                ? theme.colors.orange1
+                                : theme.colors.white,
+                          },
+                        ]}>
+                        <Image
+                          style={styles.image}
+                          source={{uri: elem.photoURL}}
+                        />
+                        <View style={styles.info}>
+                          <View>
+                            <Text style={styles.name}>{elem.full_name}</Text>
+                            <Text style={styles.userName}>
+                              {elem.user_name}
+                            </Text>
+                            <Text style={styles.status}>{elem.status}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
                 <TouchableOpacity
-                  style={styles.cardView}
-                  key={index.toString()}>
-                  <Image source={item.cardImage} style={styles.card} />
+                  onPress={() => {
+                    this.inviteFriend();
+                  }}
+                  key="btn0"
+                  style={styles.cardView}>
+                  <Image source={images.inviteFriend} style={styles.card} />
                   <View
                     style={[
                       styles.iconBack,
                       {
-                        backgroundColor:
-                          index !== 2 ? theme.colors.white : 'transparent',
+                        backgroundColor: theme.colors.white,
                       },
                     ]}>
-                    <Image
-                      source={item.icon}
-                      style={[
-                        index === 2
-                          ? styles.cardIcon1
-                          : index === 0
-                          ? styles.cardIcon3
-                          : styles.cardIcon2,
-                      ]}
-                    />
+                    <Image source={images.girl} style={styles.cardIcon3} />
                   </View>
-                  <Text style={styles.cardTitle}>{item.title}</Text>
+                  <Text style={styles.cardTitle}>
+                    {'Invite your\nMasterMIND friend'}
+                  </Text>
                 </TouchableOpacity>
-              );
-            })}
-          </View>
-          <TouchableOpacity style={styles.playNow}>
-            <Image source={images.playNow} style={styles.playNowImage} />
-          </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={{marginTop: 29}}>
+                {inviteList.map((item, index) => {
+                  return (
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (item.handler) {
+                          item.handler();
+                        }
+                      }}
+                      style={styles.cardView}
+                      key={'btn' + index.toString()}>
+                      <Image source={item.cardImage} style={styles.card} />
+                      <View
+                        style={[
+                          styles.iconBack,
+                          {
+                            backgroundColor:
+                              index !== 2 ? theme.colors.white : 'transparent',
+                          },
+                        ]}>
+                        <Image
+                          source={item.icon}
+                          style={[
+                            index === 2
+                              ? styles.cardIcon1
+                              : index === 0
+                              ? styles.cardIcon3
+                              : styles.cardIcon2,
+                          ]}
+                        />
+                      </View>
+                      <Text style={styles.cardTitle}>{item.title}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <TouchableOpacity style={styles.playNow}>
+                <Image source={images.playNow} style={styles.playNowImage} />
+              </TouchableOpacity>
+            </>
+          )}
           <SocialMedia />
         </ScrollView>
       </ScreenContainer>
@@ -237,5 +420,47 @@ const styles = StyleSheet.create({
     width: '35%',
     marginLeft: 150,
     height: 40,
+  },
+  box: {
+    flex: 1,
+    flexDirection: 'row',
+    borderRadius: 10,
+    padding: 15,
+    shadowColor: theme.colors.white,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 1.0,
+    elevation: 1,
+    alignItems: 'center',
+  },
+  image: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+  },
+  info: {
+    marginLeft: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flex: 1,
+    alignItems: 'center',
+  },
+  name: {
+    fontSize: 14,
+    color: theme.colors.grey5,
+    fontFamily: theme.fonts.redHatBold,
+  },
+  userName: {
+    fontSize: 13,
+    fontFamily: theme.fonts.redHatMedium,
+    color: theme.colors.grey3,
+    marginVertical: 3,
+  },
+  status: {
+    fontFamily: theme.fonts.redHatMedium,
+    fontSize: 13,
   },
 });

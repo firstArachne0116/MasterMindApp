@@ -19,11 +19,11 @@ const Header = (props) => {
           <TouchableOpacity
             onPress={
               index === 0
-                ? () => navigation.navigate('ProfileStatistics')
+                ? () => navigation.navigate('GlobalRankList')
                 : index === 1
-                ? () => navigation.navigate('NewGame')
+                ? () => navigation.navigate('SelectGameType')
                 : index === 2
-                ? () => navigation.navigate('EditPassword')
+                ? () => navigation.navigate('ProfileStatistics')
                 : () => onMenubarHandle()
             }
             key={index.toString()}>

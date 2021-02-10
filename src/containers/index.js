@@ -15,3 +15,6 @@ export {default as EditPassword} from './EditPassword/EditPassword';
 export {default as Notification} from './Settings/Notification';
 export {default as PrivacySetting} from './Settings/PrivacySetting';
 export {default as AccountSettings} from './Settings/AccountSettins';
+export {default as Home} from './Home/Home';
+export {default as SelectGameType} from './StartGame/SelectGameType';
+export {default as SelectLanguage} from './StartGame/SelectLanguage';

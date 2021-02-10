@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {Component} from 'react';
 import {
   StyleSheet,
@@ -78,7 +79,7 @@ class Signup extends Component {
           noValid: 'User Name field must be alphabatic',
           name: 'name',
           icon: images.user,
-          regex: /^[a-zA-Z0-9._]+$/,
+          regex: /^[a-zA-Z0-9._\s]+$/,
         },
         {
           placeholder: 'Password',
