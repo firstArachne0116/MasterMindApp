@@ -29,14 +29,21 @@ class ChatConversion extends Component {
 
   componentDidMount() {
     const currentUser = auth().currentUser;
-    this.setState({
-      user: {
-        name: currentUser.displayName,
-        email: currentUser.email,
-        avatar: currentUser.photoURL,
-        _id: currentUser.uid,
-      },
-    });
+    firestore()
+      .collection('users')
+      .doc(currentUser.uid)
+      .get()
+      .then((user) => {
+        const userData = user.data();
+        this.setState({
+          user: {
+            name: userData.full_name,
+            email: userData.email,
+            avatar: userData.photoURL,
+            _id: userData.uid,
+          },
+        });
+      });
 
     this.interval = setInterval(async () => {
       const roomId = this.props.route.params.roomId;
@@ -49,7 +56,9 @@ class ChatConversion extends Component {
         .then((snapshot) => {
           let temp = [];
           snapshot.forEach((doc) => {
-            temp.push(doc.data());
+            if (doc) {
+              temp.push(doc.data());
+            }
           });
 
           this.setState({messages: temp});

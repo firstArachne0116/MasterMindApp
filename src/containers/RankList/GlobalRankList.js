@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {Component} from 'react';
 import {
   StyleSheet,
@@ -14,91 +15,126 @@ import LinearGradient from 'react-native-linear-gradient';
 import {ScreenContainer, SocialMedia, LanguageModal} from '../../components';
 import {images, theme} from '../../constants';
 
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+
 class GlobalRankList extends Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: true,
       langData: [
-        {name: 'Bulgarian', flag: images.uk},
-        {name: 'Croatian', flag: images.bulgaria},
-        {name: 'English (UK)', flag: images.uk},
-        {name: 'Finish', flag: images.bulgaria},
-        {name: 'French', flag: images.uk},
-        {name: 'Bulgarian', flag: images.bulgaria},
-        {name: 'Croatian', flag: images.bulgaria},
-        {name: 'English (UK)', flag: images.uk},
-        {name: 'Finish', flag: images.bulgaria},
-        {name: 'French', flag: images.uk},
+        {name: 'English (UK)', code: 'en', flag: '🇬🇧'},
+        {name: 'Croatian', code: 'hr', flag: '🇭🇷'},
+        {name: 'German', code: 'de', flag: '🇩🇪'},
       ],
-      selectedLang: images.uk,
+      selectedLang: {name: 'English (UK)', code: 'en', flag: '🇬🇧'},
       isLangModal: false,
       itemToRender: 10,
       isWeekSelect: true,
-      data: [
-        {
-          id: 1,
-          icon: 'https://bootdey.com/img/Content/avatar/avatar1.png',
-          name: 'Cornell',
-          status: 'Fast Finger Dog',
-          w: '65',
-          L: '20',
-          socre: '74,855',
-          cross: 'right',
-        },
-        {
-          id: 2,
-          icon: 'https://bootdey.com/img/Content/avatar/avatar2.png',
-          name: 'Adam',
-          status: 'Fast Finger Dog',
-          w: '62',
-          L: '18',
-          socre: '72,254',
-          cross: 'wrong',
-        },
-        {
-          id: 3,
-          icon: 'https://bootdey.com/img/Content/avatar/avatar3.png',
-          name: 'Pete Ho',
-          status: 'Fast Finger Dog',
-          w: '60',
-          L: '15',
-          socre: '71,957',
-          cross: 'wrong',
-        },
-        {
-          id: 4,
-          icon: 'https://bootdey.com/img/Content/avatar/avatar4.png',
-          name: 'Sherita',
-          status: 'Fast Finger Dog',
-          w: '58',
-          L: '09',
-          socre: '70,955',
-          cross: 'wrong',
-        },
-        {
-          id: 5,
-          icon: 'https://bootdey.com/img/Content/avatar/avatar3.png',
-          name: 'Pete Ho',
-          status: 'Fast Finger Dog',
-          w: '60',
-          L: '15',
-          socre: '71,957',
-          cross: 'wrong',
-        },
-        {
-          id: 6,
-          icon: 'https://bootdey.com/img/Content/avatar/avatar4.png',
-          name: 'Sherita',
-          status: 'Fast Finger Dog',
-          w: '58',
-          L: '09',
-          socre: '70,955',
-          cross: 'wrong',
-        },
-      ],
+      data: [],
     };
   }
+  _unsubscribe = null;
+
+  componentDidMount() {
+    this.getGlobalRankList();
+    this._unsubscribe = this.props.navigation.addListener('focus', () => {
+      this.getGlobalRankList();
+    });
+  }
+
+  componentWillUnmount() {
+    if (this._unsubscribe) {
+      this._unsubscribe();
+    }
+  }
+
+  getGlobalRankList = async () => {
+    const currentUser = auth().currentUser;
+    firestore()
+      .collection('users')
+      .get()
+      .then(async (snapshot) => {
+        if (!snapshot) {
+          snapshot = {docs: []};
+        }
+        const users = snapshot.docs
+          // .filter((user) => user.data().uid !== currentUser.uid)
+          .map(async (user) => {
+            const userData = user.data();
+            const now = new Date();
+            const scores = (
+              await firestore()
+                .collection('users')
+                .doc(userData.uid)
+                .collection('score')
+                .get()
+            ).docs
+              .map((scoreSnap) => scoreSnap.data())
+              .filter((score) => {
+                if (
+                  score.language !== this.state.selectedLang.code ||
+                  score.type === 'unsigned' ||
+                  (this.state.isWeekSelect &&
+                    now.getTime() - score.date.toDate().getTime() >
+                      7 * 24 * 3600 * 1000)
+                ) {
+                  return false;
+                }
+                return true;
+              });
+            const firstName = userData.full_name.split(' ')[0];
+            const lastName = userData.full_name.split(' ')[1];
+            return {
+              uid: userData.uid,
+              icon: userData.photoURL,
+              name:
+                userData.full_name.length > 13
+                  ? (firstName + (lastName ? ' ' + lastName[0] : '')).slice(
+                      0,
+                      13,
+                    )
+                  : userData.full_name,
+              w: scores.filter((score) => score.win === 1).length,
+              L: scores.filter((score) => score.win === -1).length,
+              score: scores.reduce((a, b) => a + b.score, 0),
+              cross: false,
+            };
+          });
+        for (let i = 0; i < users.length; i++) {
+          users[i] = await users[i];
+        }
+        users.sort((a, b) => {
+          if (a.score < b.score) {
+            return 1;
+          }
+          if (a.score > b.score) {
+            return -1;
+          }
+          return 0;
+        });
+        const scoreLimits = [1000, 5000, 10000, 20000, 35000, 65000];
+        const levels = [
+          'JumpingSheep',
+          'RunningChicken',
+          'FightCoala',
+          'FastFingerDog',
+          'BadAssMonkey',
+          'TigerGangClan',
+          'MasterBrain',
+        ];
+        this.setState({
+          data: users
+            .map((user, id) => ({
+              ...user,
+              status: levels[scoreLimits.findIndex((li) => li > user.score)],
+              id: id + 1,
+            }))
+            .slice(0, 100),
+        });
+      });
+  };
 
   handleLangModal = () => {
     this.setState({
@@ -106,36 +142,26 @@ class GlobalRankList extends Component {
     });
   };
 
-  handleLang = (flag) => {
-    this.setState({
-      isLangModal: false,
-      selectedLang: flag,
-    });
+  handleLang = (lang) => {
+    this.setState(
+      {
+        isLangModal: false,
+        selectedLang: lang,
+      },
+      () => {
+        this.getGlobalRankList();
+      },
+    );
   };
 
   render() {
     const {navigation} = this.props;
-    const {isWeekSelect, selectedLang} = this.state;
+    const {isWeekSelect, selectedLang, data} = this.state;
     return (
       <ScreenContainer>
         <ScrollView
           style={styles.user_data}
-          contentContainerStyle={{paddingBottom: 30}}
-          //   contentContainerStyle={{paddingBottom: 70}}
-          //   onMomentumScrollEnd={(e) => {
-          //     const scrollPosition = e.nativeEvent.contentOffset.y;
-          //     const scrolViewHeight = e.nativeEvent.layoutMeasurement.height;
-          //     const contentHeight = e.nativeEvent.contentSize.height;
-          //     const isScrolledToBottom = scrolViewHeight + scrollPosition;
-          //     // check if scrollView is scrolled to bottom and limit itemToRender to data length
-          //     if (
-          //       isScrolledToBottom >= contentHeight - 50 &&
-          //       this.state.itemToRender <= this.state.data.length
-          //     ) {
-          //       this.setState({itemToRender: this.state.itemToRender + 10});
-          //     }
-          //         }}
-        >
+          contentContainerStyle={{paddingBottom: 30}}>
           <ImageBackground
             source={images.globalRankBack}
             style={styles.bg_image}
@@ -147,7 +173,8 @@ class GlobalRankList extends Component {
               <TouchableOpacity
                 onPress={this.handleLangModal}
                 style={styles.langView}>
-                <Image source={selectedLang} style={styles.langImage} />
+                {/* <Image source={selectedLang} style={styles.langImage} /> */}
+                <Text>{selectedLang.flag}</Text>
                 <Icon
                   name="chevron-down"
                   size={20}
@@ -158,7 +185,10 @@ class GlobalRankList extends Component {
             <Text style={styles.title}>{'Global Rank List'}</Text>
             <View style={styles.optionButtonView}>
               <TouchableOpacity
-                onPress={() => this.setState({isWeekSelect: true})}
+                onPress={() => {
+                  this.setState({isWeekSelect: true});
+                  this.getGlobalRankList();
+                }}
                 style={[
                   styles.optionButton,
                   {
@@ -178,66 +208,85 @@ class GlobalRankList extends Component {
                       : 'transparent',
                   },
                 ]}
-                onPress={() => this.setState({isWeekSelect: false})}>
+                onPress={() => {
+                  this.setState({isWeekSelect: false});
+                  this.getGlobalRankList();
+                }}>
                 <Text style={styles.optionButtonText}>{'All Time'}</Text>
               </TouchableOpacity>
             </View>
-            <View style={{alignItems: 'center', marginTop: 8}}>
-              <View style={[styles.avtarViewStyle, styles.avtarView]}>
-                <Image style={styles.avatar} source={images.image1} />
+            {!!data[0] && (
+              <View style={{alignItems: 'center', marginTop: 8}}>
+                <View style={[styles.avtarViewStyle, styles.avtarView]}>
+                  <Image style={styles.avatar} source={{uri: data[0].icon}} />
+                </View>
+                <Text style={styles.name}>{data[0].name}</Text>
+                <Text style={styles.subText}>{data[0].status}</Text>
+                <LinearGradient
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 1}}
+                  colors={[theme.colors.orange5, theme.colors.orange6]}
+                  style={styles.gradient}>
+                  <FontAwesome
+                    name="star"
+                    color={theme.colors.white}
+                    size={12}
+                  />
+                  <Text style={styles.topScore}>{data[0].score}</Text>
+                </LinearGradient>
               </View>
-              <Text style={styles.name}>{'Leia Rangel'}</Text>
-              <Text style={styles.subText}>{'MasterMIND'}</Text>
-              <LinearGradient
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 1}}
-                colors={[theme.colors.orange5, theme.colors.orange6]}
-                style={styles.gradient}>
-                <FontAwesome name="star" color={theme.colors.white} size={12} />
-                <Text style={styles.topScore}>{'84,855'}</Text>
-              </LinearGradient>
-            </View>
+            )}
 
             <View style={styles.rank23View}>
-              <View style={{marginLeft: 5}}>
-                <View style={[styles.avtarViewStyle, styles.avtarView1]}>
-                  <Image style={styles.avatar1} source={images.image5} />
+              {!!data[1] && (
+                <View style={{marginLeft: 5}}>
+                  <View style={[styles.avtarViewStyle, styles.avtarView1]}>
+                    <Image
+                      style={styles.avatar1}
+                      source={{uri: data[1].icon}}
+                    />
+                  </View>
+                  <Text style={styles.name}>{data[1].name}</Text>
+                  <Text style={styles.subText}>{data[1].status}</Text>
+                  <LinearGradient
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 1}}
+                    colors={[theme.colors.orange5, theme.colors.orange6]}
+                    style={styles.gradient}>
+                    <FontAwesome
+                      name="star"
+                      color={theme.colors.white}
+                      size={12}
+                    />
+                    <Text style={styles.topScore}>{data[1].score}</Text>
+                  </LinearGradient>
                 </View>
-                <Text style={styles.name}>{'Monty David'}</Text>
-                <Text style={styles.subText}>{'Tiger Gang Clan'}</Text>
-                <LinearGradient
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 1}}
-                  colors={[theme.colors.orange5, theme.colors.orange6]}
-                  style={styles.gradient}>
-                  <FontAwesome
-                    name="star"
-                    color={theme.colors.white}
-                    size={12}
-                  />
-                  <Text style={styles.topScore}>{'84,855'}</Text>
-                </LinearGradient>
-              </View>
+              )}
 
-              <View style={{marginTop: 18}}>
-                <View style={[styles.avtarViewStyle, styles.avtarView1]}>
-                  <Image style={styles.avatar1} source={images.image4} />
+              {!!data[2] && (
+                <View style={{marginTop: 18}}>
+                  <View style={[styles.avtarViewStyle, styles.avtarView1]}>
+                    <Image
+                      style={styles.avatar1}
+                      source={{uri: data[2].icon}}
+                    />
+                  </View>
+                  <Text style={styles.name}>{data[2].name}</Text>
+                  <Text style={styles.subText}>{data[2].status}</Text>
+                  <LinearGradient
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 1}}
+                    colors={[theme.colors.orange5, theme.colors.orange6]}
+                    style={styles.gradient}>
+                    <FontAwesome
+                      name="star"
+                      color={theme.colors.white}
+                      size={12}
+                    />
+                    <Text style={styles.topScore}>{data[2].score}</Text>
+                  </LinearGradient>
                 </View>
-                <Text style={styles.name}>{'Mabelle Dean'}</Text>
-                <Text style={styles.subText}>{'Bad Ass Monkey'}</Text>
-                <LinearGradient
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 1}}
-                  colors={[theme.colors.orange5, theme.colors.orange6]}
-                  style={styles.gradient}>
-                  <FontAwesome
-                    name="star"
-                    color={theme.colors.white}
-                    size={12}
-                  />
-                  <Text style={styles.topScore}>{'80,855'}</Text>
-                </LinearGradient>
-              </View>
+              )}
             </View>
           </ImageBackground>
 
@@ -248,11 +297,16 @@ class GlobalRankList extends Component {
               <Text style={[styles.listHeader, {width: '10%'}]}>W</Text>
               <Text style={[styles.listHeader, {width: '10%'}]}>L</Text>
               <Text style={[styles.listHeader, {width: '18%'}]}>Score</Text>
-              <Text style={[styles.listHeader, {width: '10%'}]}>C</Text>
+              <Text
+                style={[
+                  styles.listHeader,
+                  {width: '10%', textAlign: 'center', paddingRight: '2%'},
+                ]}>
+                C
+              </Text>
             </View>
 
-            {this.state.data.map((elem, i) => {
-              //   if (i + 1 <= this.state.itemToRender) {
+            {data.map((elem, i) => {
               return (
                 <View key={i.toString()} style={styles.notificationBox}>
                   <Text style={[styles.id, {width: '8%'}]}>{elem.id}</Text>
@@ -263,30 +317,23 @@ class GlobalRankList extends Component {
                       <Text style={styles.statusSubText}>{elem.status}</Text>
                     </View>
                   </View>
-                  <Text style={[styles.socre, {width: '10%'}]}>{elem.w}</Text>
-                  <Text style={[styles.socre, {width: '10%'}]}>{elem.L}</Text>
+                  <Text style={[styles.score, {width: '10%'}]}>{elem.w}</Text>
+                  <Text style={[styles.score, {width: '10%'}]}>{elem.L}</Text>
                   <View style={[styles.profileView, {width: '18%'}]}>
                     <Image style={{marginRight: 3}} source={images.star} />
-                    <Text style={[styles.socre]}>{elem.socre}</Text>
+                    <Text style={[styles.score]}>{elem.score}</Text>
                   </View>
                   <View
-                    style={
-                      elem.cross === 'right'
-                        ? styles.rightCross
-                        : styles.wrongCross
-                    }>
+                    style={elem.cross ? styles.rightCross : styles.wrongCross}>
                     <Image
                       style={[styles.crossImage]}
                       source={
-                        elem.cross === 'right'
-                          ? images.rightCross
-                          : images.wrongCross
+                        elem.cross ? images.rightCross : images.wrongCross
                       }
                     />
                   </View>
                 </View>
               );
-              //   }
             })}
           </View>
           <SocialMedia />
@@ -369,6 +416,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderColor: theme.colors.white,
+    backgroundColor: theme.colors.white,
   },
   avatar: {
     width: 94,
@@ -382,12 +430,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: theme.fonts.extraBold,
     marginTop: 3,
+    textAlign: 'center',
   },
   subText: {
     color: theme.colors.white,
     fontFamily: theme.fonts.redHatMedium,
     fontSize: 12,
     marginVertical: 3,
+    textAlign: 'center',
   },
   gradient: {
     flexDirection: 'row',
@@ -396,6 +446,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 7,
     paddingVertical: 2,
+    width: 80,
   },
   topScore: {
     color: theme.colors.white,
@@ -461,7 +512,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.redHatMedium,
     color: theme.colors.grey5,
   },
-  socre: {
+  score: {
     fontSize: 12,
     fontFamily: theme.fonts.redHatMedium,
     color: theme.colors.grey3,

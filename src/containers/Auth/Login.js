@@ -74,7 +74,7 @@ class Login extends Component {
           this.setState({
             loading: false,
           });
-          navigation.navigate('NewGame', {isLoading: false});
+          navigation.navigate('Home', {isLoading: false});
         })
         .catch((error) => {
           this.setState({loading: false});

@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {scale, theme, images} from '../../constants/index.js';
+import languages from '../../Helper/languages.json';
 
 export const GameBoxHeader = ({navigation, params, turnId, me}) => (
   <View style={styles.content}>
@@ -14,7 +15,10 @@ export const GameBoxHeader = ({navigation, params, turnId, me}) => (
         end={{x: 1, y: 1}}
         colors={[theme.colors.pink3, theme.colors.pink4]}
         style={styles.gradient}>
-        <Image source={images.uk} style={styles.countryFlag} />
+        {/* <Image source={images.uk} style={styles.countryFlag} /> */}
+        <Text>
+          {languages.find((lang) => lang.code === params.language).flag}
+        </Text>
         <Text style={styles.turnText}>
           {turnId === me.uid ? 'Your turn to make a move' : "Opponent's turn"}
         </Text>

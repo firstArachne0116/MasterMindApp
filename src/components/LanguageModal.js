@@ -30,10 +30,11 @@ const LanguageModal = (props) => {
           {langData.map((d, i) => {
             return (
               <TouchableOpacity
-                onPress={() => onPress(d.flag)}
+                onPress={() => onPress(d)}
                 key={i.toString()}
                 style={styles.langView}>
-                <Image source={d.flag} style={styles.flag} />
+                {/* <Image source={d.flag} style={styles.flag} /> */}
+                <Text>{d.flag}</Text>
                 <Text style={styles.language}>{d.name}</Text>
               </TouchableOpacity>
             );
@@ -60,7 +61,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginRight: 35,
     width: scale(145),
-    height: 200,
+    maxHeight: 200,
   },
   langView: {
     flexDirection: 'row',
@@ -77,6 +78,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: theme.fonts.redHatMedium,
     color: theme.colors.black1,
+    marginLeft: 10,
   },
 });
 

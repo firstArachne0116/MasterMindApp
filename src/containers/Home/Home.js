@@ -30,7 +30,7 @@ class Home extends Component {
           ? false
           : true,
       currentUser: auth().currentUser,
-      session_list: [],
+      sessionList: [],
     };
   }
 
@@ -45,15 +45,15 @@ class Home extends Component {
     }, 1600);
     if (user) {
       this.getSessionsList();
-      this._unsubscribe = this.props.navigation.addListener('focus', () => {
-        this.getSessionsList();
-      });
+      // this._unsubscribe = this.props.navigation.addListener('focus', () => {
+      //   this.getSessionsList();
+      // });
     }
   }
 
-  componentWillUnmount() {
-    this._unsubscribe();
-  }
+  // componentWillUnmount() {
+  //   this._unsubscribe();
+  // }
 
   handleMenu = () => {
     this.setState({
@@ -74,9 +74,11 @@ class Home extends Component {
     firestore()
       .collection('messages')
       .orderBy('updated_at', 'desc')
-      .get()
-      .then((querySnapshot) => {
-        const session_list = querySnapshot.docs
+      .onSnapshot((querySnapshot) => {
+        if (!querySnapshot) {
+          querySnapshot = {docs: []};
+        }
+        const sessionList = querySnapshot.docs
           .filter(
             (item) =>
               item.id.startsWith(user.uid) || item.id.endsWith(user.uid),
@@ -84,7 +86,30 @@ class Home extends Component {
           .map((doc) => {
             return {uid: doc.id, ...doc.data()};
           });
-        this.setState({session_list, isLoadingScreen: false});
+        const now = new Date();
+        const newSessionList = [];
+        sessionList.map((room) => {
+          if (room.end_at.toDate().getTime() >= now.getTime()) {
+            newSessionList.push(room);
+            return;
+          }
+          const player = room.players.find((pl) => pl.uid === user.uid);
+          if (player) {
+            switch (player.status.toUpperCase()) {
+              case 'INVITED':
+              case 'WAITING':
+                firestore().collection('messages').doc(room.id).delete();
+                break;
+              case 'YOUR MOVE':
+              case 'PENDING':
+                // this.passOneTurn(room);
+                break;
+            }
+          } else {
+            firestore().collection('messages').doc(room.id).delete();
+          }
+        });
+        this.setState({sessionList, isLoadingScreen: false});
       });
   };
 
@@ -153,7 +178,7 @@ class Home extends Component {
 
   render() {
     const {navigation} = this.props;
-    const {session_list, isLoadingScreen} = this.state;
+    const {sessionList, isLoadingScreen} = this.state;
     const currentUser = auth().currentUser;
 
     if (isLoadingScreen) {
@@ -161,7 +186,7 @@ class Home extends Component {
     } else {
       return (
         <ScreenContainer>
-          {session_list.length ? (
+          {sessionList.length ? (
             <ImageBackground
               source={images.newGameBack}
               style={styles.bg_image}>
@@ -171,7 +196,7 @@ class Home extends Component {
                   style={styles.container}
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={theme.PB35}>
-                  {this.state.session_list.map((elem, i) => {
+                  {this.state.sessionList.map((elem, i) => {
                     const player = elem.players.find(
                       (item) => item.uid !== currentUser.uid,
                     );

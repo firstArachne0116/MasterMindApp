@@ -28,6 +28,7 @@ import {
   Home,
   SelectGameType,
   SelectLanguage,
+  BuyNow,
 } from './src/containers';
 
 import admob, {MaxAdContentRating} from '@react-native-firebase/admob';
@@ -88,6 +89,7 @@ class App extends React.Component {
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="SelectGameType" component={SelectGameType} />
           <Stack.Screen name="SelectLanguage" component={SelectLanguage} />
+          <Stack.Screen name="BuyNow" component={BuyNow} />
           <Stack.Screen
             name="SessionInvitation"
             component={SessionInvitation}

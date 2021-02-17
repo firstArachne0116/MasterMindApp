@@ -224,7 +224,7 @@ class Signup extends Component {
       this.setState({
         loading: false,
       });
-      navigation.navigate('NewGame', {isLoading: false});
+      navigation.navigate('Home', {isLoading: false});
     });
   };
 

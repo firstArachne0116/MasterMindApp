@@ -4,18 +4,42 @@ import {images, theme, scale} from '../../constants';
 import {ScreenContainer, Header, MenuModal} from '../../components';
 import {GameCard} from '../../components';
 
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+
 class SelectGameType extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isMenuOpen: false,
+      currentUser: auth().currentUser,
+      userSigned: false,
     };
+  }
+
+  componentDidMount() {
+    firestore()
+      .collection('users')
+      .doc(this.state.currentUser.uid)
+      .onSnapshot((snapshot) => {
+        if (snapshot && snapshot.data().signed) {
+          this.setState({userSigned: true});
+        }
+      });
   }
 
   handleUnsigned = () => {
     const {navigation} = this.props;
-    console.log('SelectLanguage');
     navigation.navigate('SelectLanguage', {type: 'unsigned'});
+  };
+
+  handleSigned = () => {
+    const {navigation} = this.props;
+    if (this.state.userSigned) {
+      navigation.navigate('SelectLanguage', {type: 'signed'});
+    } else {
+      navigation.navigate('BuyNow');
+    }
   };
 
   handleMenu = () => {
@@ -50,7 +74,7 @@ class SelectGameType extends Component {
                 title={'Your scores will be submitted to the global rank list'}
                 availableText={'* Available only for Paid Users'}
                 buttonText={'Play Signed Game'}
-                onPress={() => this.setState({isSignedGame: true})}
+                onPress={this.handleSigned}
               />
             </View>
           </View>

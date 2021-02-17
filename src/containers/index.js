@@ -18,3 +18,4 @@ export {default as AccountSettings} from './Settings/AccountSettins';
 export {default as Home} from './Home/Home';
 export {default as SelectGameType} from './StartGame/SelectGameType';
 export {default as SelectLanguage} from './StartGame/SelectLanguage';
+export {default as BuyNow} from './StartGame/BuyNow';

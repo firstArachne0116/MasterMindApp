@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {
@@ -97,6 +98,9 @@ class ProfileStatistics extends Component {
     this.state = {
       isMenuOpen: false,
       userData: null,
+      won: 1,
+      withdraw: 1,
+      lost: 1,
     };
   }
 
@@ -112,16 +116,52 @@ class ProfileStatistics extends Component {
     }
   }
 
-  initState = async () => {
-    const user = await auth().currentUser;
-    await firestore()
+  initState = () => {
+    const user = auth().currentUser;
+    const that = this;
+    firestore()
       .collection('users')
       .doc(user.uid)
       .get()
       .then((snapshot) => {
         const userData = snapshot.data();
-        this.props.setUser(userData);
-        this.setState({user, userData});
+        that.props.setUser(userData);
+        that.setState({user, userData});
+
+        firestore()
+          .collection('users')
+          .doc(userData.uid)
+          .collection('score')
+          .get()
+          .then((scoreDocs) => {
+            const scores = scoreDocs.docs.map((scoreSnap) => scoreSnap.data());
+            const weeklyScores = scores.filter(
+              (score) =>
+                new Date().getTime() - score.date.toDate().getTime() <
+                7 * 24 * 3600 * 1000,
+            );
+            const scoreLimits = [1000, 5000, 10000, 20000, 35000, 65000];
+            const levels = [
+              'JumpingSheep',
+              'RunningChicken',
+              'FightCoala',
+              'FastFingerDog',
+              'BadAssMonkey',
+              'TigerGangClan',
+              'MasterBrain',
+            ];
+            const totalScore = scores.reduce((a, b) => a + b.score, 0);
+            that.setState({
+              totalScore,
+              weeklyScore: weeklyScores.reduce((a, b) => a + b.score, 0),
+              won: weeklyScores.filter((score) => score.win === 1).length,
+              withdraw: weeklyScores.filter((score) => score.win === 0).length,
+              lost: weeklyScores.filter((score) => score.win === -1).length,
+              sessionPlayed: scores.length,
+              status: levels[scoreLimits.findIndex((li) => li > totalScore)],
+              maxScore: Math.max(...scores.map((score) => score.score)),
+            });
+          });
       })
       .catch((err) => {
         console.log('Error getting documents', err);
@@ -160,21 +200,26 @@ class ProfileStatistics extends Component {
       {title: 'T'},
       {title: 'F'},
     ];
+    const maxValue = Math.max(
+      this.state.won,
+      this.state.withdraw,
+      this.state.lost,
+    );
     const weeklyData = [
       {
-        value: 10,
+        value: (10 * this.state.won) / maxValue,
         svg: {
           fill: 'url(#gradient)',
         },
       },
       {
-        value: 6,
+        value: (10 * this.state.withdraw) / maxValue,
         svg: {
           fill: 'url(#gradient1)',
         },
       },
       {
-        value: 4,
+        value: (10 * this.state.lost) / maxValue,
         svg: {
           fill: 'url(#gradient2)',
         },
@@ -207,7 +252,7 @@ class ProfileStatistics extends Component {
                   />
                 </View>
                 <Text style={styles.name}>{userData.full_name}</Text>
-                <Text style={styles.status}>{userData.status}</Text>
+                <Text style={styles.status}>{this.state.status}</Text>
                 <View style={styles.timeView}>
                   <View style={styles.direction}>
                     <MaterialCommunityIcons
@@ -225,7 +270,7 @@ class ProfileStatistics extends Component {
                       size={18}
                       color={theme.colors.white}
                     />
-                    <Text style={styles.time}>{'Top of the world'}</Text>
+                    <Text style={styles.time}>{userData.status}</Text>
                   </View>
                 </View>
               </View>
@@ -247,7 +292,9 @@ class ProfileStatistics extends Component {
                       source={images.star}
                       style={{width: 16, height: 16, marginRight: 6}}
                     />
-                    <Text style={styles.totalScore}>{'4,520'}</Text>
+                    <Text style={styles.totalScore}>
+                      {this.state.totalScore}
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.lineChartView}>
@@ -328,9 +375,11 @@ class ProfileStatistics extends Component {
                 </BarChart>
                 <View style={styles.barChartLine} />
                 <View style={styles.barChartDataView}>
-                  <Text style={styles.barchartBottom}>{'10'}</Text>
-                  <Text style={[styles.barchartBottom]}>{'06'}</Text>
-                  <Text style={[styles.barchartBottom]}>{'05'}</Text>
+                  <Text style={styles.barchartBottom}>{this.state.won}</Text>
+                  <Text style={[styles.barchartBottom]}>
+                    {this.state.withdraw}
+                  </Text>
+                  <Text style={[styles.barchartBottom]}>{this.state.lost}</Text>
                 </View>
               </View>
               <View style={styles.scoreView}>
@@ -344,7 +393,11 @@ class ProfileStatistics extends Component {
                         style={styles.scoreIcon}
                       />
                       <View>
-                        <Text style={styles.score}>{i === 0 ? 5854 : 25}</Text>
+                        <Text style={styles.score}>
+                          {i === 0
+                            ? this.state.weeklyScore
+                            : this.state.sessionPlayed}
+                        </Text>
                         <Text style={styles.scoreText}>
                           {i === 0 ? 'Total Score' : 'Sessions Played'}
                         </Text>
@@ -358,7 +411,10 @@ class ProfileStatistics extends Component {
                 title={'User Global Ranking\nPosition'}
                 score="625.55"
               />
-              <ProfileCard title="Higest Session Score" score="525" />
+              <ProfileCard
+                title="Higest Session Score"
+                score={this.state.maxScore}
+              />
               <ProfileCard title="Longest Word" score="Successfully" />
               <ProfileCard title="Higest Word Scoring" score="125" />
               <ProfileCard title="Points to next rank" score="8584" />

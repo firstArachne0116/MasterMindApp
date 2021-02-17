@@ -18,6 +18,10 @@ import firestore from '@react-native-firebase/firestore';
 import database from '@react-native-firebase/database';
 import auth from '@react-native-firebase/auth';
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
 class SessionInvitation extends Component {
   constructor(props) {
     super(props);
@@ -75,6 +79,9 @@ class SessionInvitation extends Component {
       .collection('messages')
       .get()
       .then((snapshot) => {
+        if (!snapshot) {
+          snapshot = {docs: []};
+        }
         list = snapshot.docs.map((doc) => doc.id);
       });
     if (list.includes(room1)) {
@@ -92,7 +99,9 @@ class SessionInvitation extends Component {
     const {navigation} = this.props;
     if (selectedFriend) {
       const roomId = await this.getRoomID(selectedFriend.uid);
-      const currentUser = auth().currentUser;
+      const currentUser = (
+        await firestore().collection('users').doc(auth().currentUser.uid).get()
+      ).data();
       const newRoom = currentUser.uid + '_' + selectedFriend.uid;
       if (roomId) {
         Alert.alert('', 'You already have a match with this player.');
@@ -110,7 +119,7 @@ class SessionInvitation extends Component {
             players: [
               {
                 uid: currentUser.uid,
-                full_name: currentUser.displayName,
+                full_name: currentUser.full_name,
                 photoURL: currentUser.photoURL,
                 status: 'Invited',
               },
@@ -125,6 +134,7 @@ class SessionInvitation extends Component {
           .then(() => {
             database().ref(`board/${newRoom}/tiles`).remove();
             database().ref(`board/${newRoom}/turnId`).remove();
+            database().ref(`board/${newRoom}/score`).remove();
             Alert.alert(
               '',
               'Successfully invited your friend.',
@@ -136,7 +146,81 @@ class SessionInvitation extends Component {
     }
   };
 
-  inviteRandomUser = () => {};
+  inviteRandomUser = () => {
+    const {language, type} = this.props.route.params;
+    const {navigation} = this.props;
+    firestore()
+      .collection('messages')
+      .get()
+      .then((messageSnaphot) => {
+        const messages = messageSnaphot.docs.map((msg) => msg.data());
+        firestore()
+          .collection('users')
+          .get()
+          .then(async (querySnapshot) => {
+            const currentUser = (
+              await firestore()
+                .collection('users')
+                .doc(auth().currentUser.uid)
+                .get()
+            ).data();
+            const users = querySnapshot.docs
+              .map((userDoc) => userDoc.data())
+              .filter(
+                (user) =>
+                  user.uid !== currentUser.uid &&
+                  messages.findIndex(
+                    (msg) =>
+                      msg.id === currentUser.uid + '_' + user.uid ||
+                      msg.id === user.uid + '_' + currentUser.uid,
+                  ) === -1,
+              );
+            if (!users.length) {
+              Alert.alert('Error', 'There is no more user to invite');
+              return;
+            }
+            console.log(users.length);
+            const randomUser = users[getRandomInt(users.length)];
+            const newRoom = currentUser.uid + '_' + randomUser.uid;
+            firestore()
+              .collection('messages')
+              .doc(newRoom)
+              .set({
+                id: newRoom,
+                language,
+                type,
+                created_at: new Date(),
+                updated_at: new Date(),
+                end_at: new Date(new Date().getTime() + 48 * 3600 * 1000),
+                players: [
+                  {
+                    uid: currentUser.uid,
+                    full_name: currentUser.full_name,
+                    photoURL: currentUser.photoURL,
+                    status: 'Invited',
+                  },
+                  {
+                    uid: randomUser.uid,
+                    full_name: randomUser.full_name,
+                    photoURL: randomUser.photoURL,
+                    status: 'Waiting',
+                  },
+                ],
+              })
+              .then(() => {
+                database().ref(`board/${newRoom}/tiles`).remove();
+                database().ref(`board/${newRoom}/turnId`).remove();
+                database().ref(`board/${newRoom}/score`).remove();
+                Alert.alert(
+                  '',
+                  `Successfully invited user ${randomUser.user_name}.`,
+                  [{text: 'OK', onPress: () => navigation.navigate('Home')}],
+                  {cancelable: false},
+                );
+              });
+          });
+      });
+  };
 
   handleSearchFriend = (txt) => {
     const user = auth().currentUser;
@@ -145,13 +229,20 @@ class SessionInvitation extends Component {
       .collection('users')
       .get()
       .then((querySnapshot) => {
+        if (!querySnapshot) {
+          querySnapshot = {docs: []};
+        }
         const friends = querySnapshot.docs
-          .map((item) => item._data)
+          .map((item) => item.data())
           .filter((item) => item.user_name.toLowerCase().includes(txt));
+        console.log(friends);
+        console.log(user);
         that.setState({
           friends: friends.filter((item) => item.uid !== user.uid),
           selectedFriend: friends.find(
-            (item) => item.uid === that.state.selectedFriend,
+            (item) =>
+              that.state.selectedFriend &&
+              item.uid === that.state.selectedFriend.uid,
           )
             ? that.state.selectedFriend
             : null,

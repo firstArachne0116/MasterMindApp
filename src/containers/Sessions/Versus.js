@@ -38,10 +38,12 @@ class Versus extends Component {
       .then(() => navigation.goBack());
   };
 
-  acceptInvitation = () => {
+  acceptInvitation = async () => {
     const {navigation} = this.props;
     const {params} = this.props.route;
-    const {currentUser} = this.state;
+    const currentUser = (
+      await firestore().collection('users').doc(auth().currentUser.uid).get()
+    ).data();
     const inviter = params.players.find((pl) => pl.uid !== currentUser.uid);
 
     firestore()
@@ -54,7 +56,7 @@ class Versus extends Component {
         players: [
           {
             uid: currentUser.uid,
-            full_name: currentUser.displayName,
+            full_name: currentUser.full_name,
             photoURL: currentUser.photoURL,
             status: 'Pending',
           },
@@ -99,10 +101,12 @@ class Versus extends Component {
             </TouchableOpacity>
 
             <View style={styles.profileContainer}>
-              <Image
-                style={styles.profile}
-                source={{uri: currentUser.photoURL}}
-              />
+              <View style={styles.avatarContainer}>
+                <Image
+                  style={styles.profile}
+                  source={{uri: currentUser.photoURL}}
+                />
+              </View>
               <LinearGradient
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 1}}
@@ -124,10 +128,16 @@ class Versus extends Component {
                 <Text style={styles.name}>{inviter.full_name}</Text>
                 <Text style={styles.scroeAvg}>{'Avg. Score: 220'}</Text>
               </LinearGradient>
-              <Image
-                style={[styles.profile, {marginLeft: 0, marginRight: 24}]}
-                source={{uri: inviter.photoURL}}
-              />
+              <View
+                style={[
+                  styles.avatarContainer,
+                  {marginLeft: 0, marginRight: 24},
+                ]}>
+                <Image
+                  style={[styles.profile]}
+                  source={{uri: inviter.photoURL}}
+                />
+              </View>
             </View>
 
             <View style={styles.buttonView}>
@@ -202,14 +212,21 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginTop: 50,
   },
-  profile: {
+  avatarContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
     borderWidth: 4,
     borderColor: theme.colors.white,
+    backgroundColor: theme.colors.white,
     marginLeft: scale(24),
     zIndex: 10,
+  },
+  profile: {
+    width: 92,
+    height: 92,
+    borderRadius: 50,
+    borderColor: theme.colors.white,
   },
   gradient: {
     width: theme.SCREENWIDTH / 2,

@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import {scale, images} from '../../constants/index.js';
 import {defineMatrix} from '../../Helper/generator';
-import dictionary from '../../constants/wordlist.en.json';
-import {initalTiles} from '../../constants/tile';
+import {initialBag} from '../../constants/tile';
 import {
   GameBoxes,
   GameBoxHeader,
@@ -35,6 +34,7 @@ const adUnitIdPROD =
     : 'ca-app-pub-2121153401296954/7621023859';
 
 const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : adUnitIdPROD;
+// const adUnitId = TestIds.INTERSTITIAL;
 let interstitial = null;
 
 function getRandomInt(max) {
@@ -53,6 +53,7 @@ export default class ActiveSession extends Component {
       bag: [],
       selectedChar: {},
       success: false,
+      reason: 'Please place your tiles',
       turnId: '',
       totalMe: 0,
       totalYou: 0,
@@ -67,8 +68,15 @@ export default class ActiveSession extends Component {
   unsubscribeAdListener = null;
 
   componentDidMount() {
-    const {roomId, uid} = this.props.route.params;
+    const {roomId, uid, language} = this.props.route.params;
     const {me} = this.state;
+    firestore()
+      .collection('users')
+      .doc(me.uid)
+      .get()
+      .then((user) => {
+        this.setState({me: user.data()});
+      });
     const that = this;
     interstitial = InterstitialAd.createForAdRequest(adUnitId, {
       requestNonPersonalizedAdsOnly: true,
@@ -88,127 +96,181 @@ export default class ActiveSession extends Component {
     });
     interstitial.load();
 
-    this.onTurnId = database()
-      .ref(`board/${roomId}/turnId`)
-      .on('value', (snapshot) => {
-        if (!snapshot.exists()) {
-          database().ref(`board/${roomId}/turnId`).set(me.uid);
-        } else {
-          this.setState({turnId: snapshot.val()});
-        }
-      });
-    database()
-      .ref(`board/${roomId}/tiles`)
-      .on('value', (snapshot) => {
-        if (!snapshot.exists()) {
-          database().ref(`board/${roomId}/tiles`).set(initalTiles);
-        } else {
-          const allTiles = snapshot.val();
-          const cards = allTiles.filter((tile) => tile.status === me.uid);
-          const oCards = allTiles.filter((tile) => tile.status === uid);
-          const bag = allTiles.filter((tile) => tile.status === 'bag');
-          const tiles = allTiles.filter(
-            (tile) => tile.status === 'board' || tile.status === 'new',
-          );
-          this.setState({
-            tiles,
-            cards: cards.map((card, index) => ({...card, id: index})),
-            bag,
-            oCards,
-          });
-          if ((cards.length < 7 || oCards.length < 7) && bag.length !== 0) {
-            console.log('take tiles from bag');
-            while (cards.length < 7 && bag.length !== 0) {
-              const randomIndex = getRandomInt(bag.length);
-              cards.push({...bag[randomIndex], status: me.uid});
-              bag.splice(randomIndex, 1);
-            }
-            while (oCards.length < 7 && bag.length !== 0) {
-              const randomIndex = getRandomInt(bag.length);
-              oCards.push({...bag[randomIndex], status: uid});
-              bag.splice(randomIndex, 1);
-            }
-            const newTiles = [...cards, ...oCards, ...bag, ...tiles];
-            database().ref(`board/${roomId}/tiles`).set(newTiles);
-          }
-        }
-      });
-    database()
-      .ref(`board/${roomId}/score`)
-      .on('value', (snapshot) => {
-        const values = snapshot.val();
-        let meTotal = 0;
-        let youTotal = 0;
-        let passedMe = 0;
-        let passedYou = 0;
-        if (values !== null) {
-          values.map((data) => {
-            if (data.id === me.uid) {
-              meTotal = data.score;
-              if (data.passed) {
-                passedMe = data.passed;
+    firestore()
+      .collection('messages')
+      .doc(roomId)
+      .get()
+      .then((rm) => {
+        if (rm.exists) {
+          this.onTurnId = database()
+            .ref(`board/${roomId}/turnId`)
+            .on('value', (snapshot) => {
+              if (!snapshot.exists()) {
+                database().ref(`board/${roomId}/turnId`).set(me.uid);
+              } else {
+                this.setState({turnId: snapshot.val()});
               }
-              if (data.win !== undefined) {
-                const finishMessages = [
-                  'Sorry, you lost the game.',
-                  'Withdrawed.',
-                  'Congratulation, you won the game.',
-                ];
-                Alert.alert(
-                  '',
-                  finishMessages[data.win + 1],
-                  [
-                    {
-                      text: 'OK',
-                      onPress: () =>
-                        this.props.navigation.navigate('GlobalRankList'),
-                    },
-                  ],
-                  {cancelable: false},
+            });
+          this.onTiles = database()
+            .ref(`board/${roomId}/tiles`)
+            .on('value', (snapshot) => {
+              if (!snapshot.exists()) {
+                database()
+                  .ref(`board/${roomId}/tiles`)
+                  .set(initialBag(language));
+              } else {
+                const allTiles = snapshot.val();
+                const cards = allTiles.filter((tile) => tile.status === me.uid);
+                const oCards = allTiles.filter((tile) => tile.status === uid);
+                const bag = allTiles.filter((tile) => tile.status === 'bag');
+                const tiles = allTiles.filter(
+                  (tile) => tile.status === 'board' || tile.status === 'new',
                 );
+                this.setState({
+                  tiles,
+                  cards: cards.map((card, index) => ({...card, id: index})),
+                  bag,
+                  oCards,
+                });
+                if (
+                  (cards.length < 7 || oCards.length < 7) &&
+                  bag.length !== 0
+                ) {
+                  console.log('take tiles from bag');
+                  while (cards.length < 7 && bag.length !== 0) {
+                    const randomIndex = getRandomInt(bag.length);
+                    cards.push({...bag[randomIndex], status: me.uid});
+                    bag.splice(randomIndex, 1);
+                  }
+                  while (oCards.length < 7 && bag.length !== 0) {
+                    const randomIndex = getRandomInt(bag.length);
+                    oCards.push({...bag[randomIndex], status: uid});
+                    bag.splice(randomIndex, 1);
+                  }
+                  const newTiles = [...cards, ...oCards, ...bag, ...tiles];
+                  database().ref(`board/${roomId}/tiles`).set(newTiles);
+                }
               }
-            } else {
-              youTotal = data.score;
-              if (data.passed) {
-                passedYou = data.passed;
-              }
-            }
-          });
-        } else {
-          database()
+            });
+          this.onScore = database()
             .ref(`board/${roomId}/score`)
-            .set([
-              {
-                id: me.uid,
-                score: 0,
-                passed: 0,
-              },
-              {
-                id: uid,
-                score: 0,
-                passed: 0,
-              },
-            ]);
+            .on('value', (snapshot) => {
+              const values = snapshot.val();
+              let meTotal = 0;
+              let youTotal = 0;
+              let passedMe = 0;
+              let passedYou = 0;
+              if (values !== null) {
+                values.map((data) => {
+                  if (data.id === me.uid) {
+                    meTotal = data.score;
+                    if (data.passed) {
+                      passedMe = data.passed;
+                    }
+                    if (data.win !== undefined) {
+                      if (this.onTurnId) {
+                        database()
+                          .ref(`board/${roomId}/turnId`)
+                          .off('value', this.onTurnId);
+                        this.onTurnId = null;
+                      }
+                      if (this.onTiles) {
+                        database()
+                          .ref(`board/${roomId}/tiles`)
+                          .off('value', this.onTiles);
+                        this.onTiles = null;
+                      }
+                      if (this.onScore) {
+                        database()
+                          .ref(`board/${roomId}/score`)
+                          .off('value', this.onScore);
+                        this.onScore = null;
+                      }
+                      const finishMessages = [
+                        'Sorry, you lost the game.',
+                        'Withdrawed.',
+                        'Congratulation, you won the game.',
+                      ];
+                      Alert.alert(
+                        '',
+                        finishMessages[data.win + 1],
+                        [
+                          {
+                            text: 'OK',
+                            onPress: () =>
+                              this.props.navigation.navigate('GlobalRankList'),
+                          },
+                        ],
+                        {cancelable: false},
+                      );
+                    }
+                  } else {
+                    youTotal = data.score;
+                    if (data.passed) {
+                      passedYou = data.passed;
+                    }
+                  }
+                });
+              } else {
+                database()
+                  .ref(`board/${roomId}/score`)
+                  .set([
+                    {
+                      id: me.uid,
+                      score: 0,
+                      passed: 0,
+                    },
+                    {
+                      id: uid,
+                      score: 0,
+                      passed: 0,
+                    },
+                  ]);
+              }
+              this.setState({
+                totalMe: meTotal,
+                totalYou: youTotal,
+                passedMe,
+                passedYou,
+              });
+            });
         }
-        this.setState({
-          totalMe: meTotal,
-          totalYou: youTotal,
-          passedMe,
-          passedYou,
-        });
       });
+    switch (language) {
+      case 'en':
+        import('../../constants/wordlist.en.json').then((dic) => {
+          console.log('en', dic);
+          that.dictionary = dic;
+        });
+        break;
+      case 'de':
+        import('../../constants/wordlist.de.json').then((dic) => {
+          console.log('de', dic);
+          that.dictionary = dic;
+        });
+        break;
+      case 'hr':
+        import('../../constants/wordlist.hr.json').then((dic) => {
+          console.log('hr', dic);
+          that.dictionary = dic;
+        });
+        break;
+    }
   }
 
   componentWillUnmount() {
     const {roomId} = this.props.route.params;
     if (this.onTurnId) {
       database().ref(`board/${roomId}/turnId`).off('value', this.onTurnId);
+      this.onTurnId = null;
     }
     if (this.onTiles) {
       database().ref(`board/${roomId}/tiles`).off('value', this.onTiles);
+      this.onTiles = null;
     }
     if (this.onScore) {
       database().ref(`board/${roomId}/score`).off('value', this.onScore);
+      this.onScore = null;
     }
     if (this.unsubscribeAdListener) {
       this.unsubscribeAdListener();
@@ -381,6 +443,10 @@ export default class ActiveSession extends Component {
             cards[i].col !== cards[j].col
           ) {
             console.log('not on line');
+            this.setState({
+              reason:
+                'Tiles must be placed in a vertical or horizontal line on the board',
+            });
             return false;
           }
         }
@@ -401,6 +467,17 @@ export default class ActiveSession extends Component {
     }
     if (!linked) {
       console.log('not linked to body');
+      if (tiles.length) {
+        this.setState({
+          reason:
+            'At least one of the tiles must be placed adjacent to an existing board tile',
+        });
+      } else {
+        this.setState({
+          reason:
+            'On the first move, one of the tiles must instead cross the center of the board',
+        });
+      }
       return false;
     }
 
@@ -427,6 +504,9 @@ export default class ActiveSession extends Component {
       for (let i = minRow; i < maxRow; i++) {
         if (!renderData[i][minCol].fill) {
           console.log('cards are not linked');
+          this.setState({
+            reason: 'There must be no blank between tiles',
+          });
           return false;
         }
       }
@@ -466,14 +546,20 @@ export default class ActiveSession extends Component {
     that.setState({score});
 
     console.log(words);
+    const wrongWords = [];
     if (words.length) {
       for (const word of words) {
-        if (!dictionary[word.toLowerCase()]) {
+        if (!this.dictionary[word.toLowerCase()]) {
           console.log(`'${word}' is not a word`);
-          return false;
+          wrongWords.push(`${word} is not a word`);
         }
       }
+      if (wrongWords.length) {
+        this.setState({reason: wrongWords.join('\n')});
+        return false;
+      }
     } else {
+      this.setState({reason: 'Please place more tiles'});
       return false;
     }
     return true;
@@ -501,7 +587,11 @@ export default class ActiveSession extends Component {
       totalMe,
       passedYou,
     } = this.state;
-    if (turnId !== me.uid || !success) {
+    if (turnId !== me.uid) {
+      return;
+    }
+    if (!success) {
+      Alert.alert('', this.state.reason);
       return;
     }
     if (this.state.adsLoaded && type === 'unsigned') {
@@ -569,6 +659,14 @@ export default class ActiveSession extends Component {
         win: newScore[0].win,
         language,
         date: new Date(),
+        type,
+      });
+      firestore().collection('users').doc(uid).collection('score').add({
+        score: newScore[1].score,
+        win: newScore[1].win,
+        language,
+        date: new Date(),
+        type,
       });
     } else {
       firestore()
@@ -583,7 +681,7 @@ export default class ActiveSession extends Component {
           players: [
             {
               uid: me.uid,
-              full_name: me.displayName,
+              full_name: me.full_name,
               photoURL: me.photoURL,
               status: 'Your move',
             },
@@ -625,7 +723,14 @@ export default class ActiveSession extends Component {
     if (this.state.turnId !== this.state.me.uid) {
       return;
     }
-    const {roomId, uid} = this.props.route.params;
+    const {
+      roomId,
+      uid,
+      language,
+      type,
+      name,
+      photoURL,
+    } = this.props.route.params;
     this.handleClear();
     const {
       oCards,
@@ -655,8 +760,49 @@ export default class ActiveSession extends Component {
       },
     ];
     if (passedMe === 4) {
-      newScore[0].win = false;
-      newScore[1].win = true;
+      newScore[0].win = -1;
+      newScore[1].win = 1;
+
+      firestore().collection('messages').doc(roomId).delete();
+      firestore().collection('users').doc(me.uid).collection('score').add({
+        score: newScore[0].score,
+        win: newScore[0].win,
+        language,
+        type,
+        date: new Date(),
+      });
+      firestore().collection('users').doc(uid).collection('score').add({
+        score: newScore[1].score,
+        win: newScore[1].win,
+        language,
+        type,
+        date: new Date(),
+      });
+    } else {
+      firestore()
+        .collection('messages')
+        .doc(roomId)
+        .set({
+          id: roomId,
+          language,
+          type,
+          updated_at: new Date(),
+          end_at: new Date(new Date().getTime() + 48 * 3600 * 1000),
+          players: [
+            {
+              uid: me.uid,
+              full_name: me.full_name,
+              photoURL: me.photoURL,
+              status: 'Your move',
+            },
+            {
+              uid,
+              full_name: name,
+              photoURL,
+              status: 'Pending',
+            },
+          ],
+        });
     }
     database()
       .ref(`board/${roomId}/tiles`)

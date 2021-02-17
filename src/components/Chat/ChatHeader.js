@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginLeft: 25,
     marginRight: 8,
+    backgroundColor: theme.colors.white,
   },
   profile: {
     width: 38,

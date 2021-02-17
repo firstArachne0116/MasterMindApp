@@ -40,6 +40,9 @@ class SessionPlayed extends Component {
     const user = auth().currentUser;
     const events = await firestore().collection('sessions');
     events.get().then((querySnapshot) => {
+      if (!querySnapshot) {
+        querySnapshot = {docs: []};
+      }
       const session_list = querySnapshot.docs
         .filter((item) => item.id !== user.uid)
         .map((doc) => {
@@ -73,6 +76,10 @@ class SessionPlayed extends Component {
       .collection('messages')
       .get()
       .then((snapshot) => {
+        if (!snapshot) {
+          list = [];
+          return;
+        }
         list = snapshot.docs.map((doc) => doc.id);
       });
     if (list.includes(room1)) {

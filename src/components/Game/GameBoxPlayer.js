@@ -27,7 +27,7 @@ export const GameBoxPlayer = ({params, me, totalMe, totalYou}) => {
         }>
         <Image source={{uri: me.photoURL}} style={styles.userImg} />
         <View>
-          <Text style={styles.userTitle}>{convertName(me.displayName)}</Text>
+          <Text style={styles.userTitle}>{convertName(me.full_name)}</Text>
           <Text
             style={[styles.userTitle, {fontFamily: theme.fonts.redHatBold}]}>
             {totalMe}
@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
     width: 34,
     borderRadius: 17,
     marginRight: 5,
+    backgroundColor: theme.colors.white,
   },
   userImg1: {
     height: 34,
@@ -122,6 +123,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     marginRight: 0,
     marginLeft: 5,
+    backgroundColor: theme.colors.white,
   },
   passView: {
     flexDirection: 'row',

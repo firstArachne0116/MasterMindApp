@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {
@@ -63,6 +64,7 @@ class AccountSettings extends Component {
   }
 
   initState = async ({currentUser, userData}) => {
+    console.log(currentUser);
     this.setState({
       ...this.state,
       loading: false,
@@ -147,17 +149,28 @@ class AccountSettings extends Component {
     return path.split('/').pop();
   }
 
-  uploadImageToStorage(path, name) {
+  uploadImageToStorage(path, fileName) {
     this.setState({isLoading: true});
+    const that = this;
+    const name = fileName + new Date().getTime();
     let reference = storage().ref('assets/' + name);
     let task = reference.putFile(path);
     task
-      .then(() => {
+      .then(async () => {
         console.log('Image uploaded to the bucket!');
-        this.setState({
+        const imagePath = await storage()
+          .ref(`assets/${name}`)
+          .getDownloadURL();
+        console.log(imagePath);
+        that.setState({
           isLoading: false,
           status: 'Image uploaded successfully',
+          imagePath,
         });
+        firestore()
+          .collection('users')
+          .doc(this.state.currentUser.uid)
+          .update({photoURL: imagePath});
       })
       .catch((e) => {
         this.setState({isLoading: false, status: 'Something went wrong'});
@@ -322,6 +335,7 @@ class AccountSettings extends Component {
                   onChangeText={(val) =>
                     this.handleChange({name: 'myStatus', val})
                   }
+                  maxLength={50}
                   style={[styles.input]}
                 />
               </InputContainer>
@@ -474,6 +488,7 @@ const styles = StyleSheet.create({
     width: scale(105),
     height: scale(105),
     borderRadius: scale(52),
+    backgroundColor: theme.colors.white,
   },
   cameraView: {
     position: 'absolute',
