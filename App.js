@@ -12,7 +12,6 @@ import {
   Signup,
   Login,
   ForgetPassword,
-  NewGame,
   SessionInvitation,
   ChatConversion,
   ChatSettings,
@@ -85,7 +84,6 @@ class App extends React.Component {
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Signup" component={Signup} />
           <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
-          <Stack.Screen name="NewGame" component={NewGame} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="SelectGameType" component={SelectGameType} />
           <Stack.Screen name="SelectLanguage" component={SelectLanguage} />

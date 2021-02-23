@@ -167,7 +167,7 @@ class GlobalRankList extends Component {
             style={styles.bg_image}
             resizeMode="stretch">
             <View style={styles.header}>
-              <TouchableOpacity onPress={() => navigation.goBack()}>
+              <TouchableOpacity onPress={() => navigation.navigate('Home')}>
                 <Image source={images.goBack} />
               </TouchableOpacity>
               <TouchableOpacity

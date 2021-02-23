@@ -13,7 +13,7 @@ import {ScreenContainer, MenuModal} from '../../components';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
-class NewGame extends Component {
+class BuyNow extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -81,7 +81,7 @@ class NewGame extends Component {
   }
 }
 
-export default NewGame;
+export default BuyNow;
 
 const styles = StyleSheet.create({
   bg_image: {
