@@ -17,11 +17,19 @@ import {ScreenContainer, SocialMedia} from '../../components';
 import firestore from '@react-native-firebase/firestore';
 import database from '@react-native-firebase/database';
 import auth from '@react-native-firebase/auth';
+import {
+  InviteContent,
+  MediaAttachment,
+  Invites,
+} from 'getsocial-react-native-sdk';
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 class SessionInvitation extends Component {
   constructor(props) {
     super(props);
@@ -39,21 +47,33 @@ class SessionInvitation extends Component {
           title: 'Invite your\nFacebook friend',
           icon: images.fbIcon,
           cardImage: images.fbFriend,
+          handler: () => {
+            this.inviteSocial('facebook');
+          },
         },
         {
           title: 'Invite your\nWhatsApp friend',
           icon: images.whatsapp,
           cardImage: images.fbFriend,
+          handler: () => {
+            this.inviteSocial('whatsapp');
+          },
         },
         {
           title: 'Invite your\nViber freinds',
           icon: images.viber,
           cardImage: images.viberFriend,
+          handler: () => {
+            this.inviteSocial('viber');
+          },
         },
         {
           title: 'Invite from\nyour contact list',
           icon: images.contactList,
           cardImage: images.viberFriend,
+          handler: () => {
+            this.inviteSocial('sms');
+          },
         },
         {
           title: 'Invite random\nMasterMIND user',
@@ -68,6 +88,45 @@ class SessionInvitation extends Component {
     };
     this.timerID = null;
   }
+
+  componentDidMount() {
+    Invites.getAvailableChannels().then((channels) => {});
+  }
+
+  inviteSocial = (channel) => {
+    const linkParams = {
+      custom_key: 'custom_value',
+    };
+
+    const customInviteContent = new InviteContent();
+    customInviteContent.subject = "I can't stop playing! Get it here";
+    customInviteContent.text = 'Check out this app\n[APP_INVITE_URL]';
+    customInviteContent.mediaAttachment = MediaAttachment.withImageUrl(
+      'https://docs.getsocial.im/images/logo.png',
+    );
+
+    Invites.send(
+      customInviteContent,
+      channel,
+      () => {
+        console.log('Customized invitation via facebook was sent');
+      },
+      () => {
+        console.log(`Customized invitation via ${channel} was cancelled`);
+      },
+      (error) => {
+        console.log(
+          `Customized invitation via ${channel} failed, error: ` +
+            error.message,
+        );
+        Alert.alert(
+          'Invitation failed',
+          `Maybe you need to install ${capitalize(channel)} on your device.`,
+        );
+      },
+    );
+    customInviteContent.linkParams = linkParams;
+  };
 
   getRoomID = async (uid) => {
     let list = [];

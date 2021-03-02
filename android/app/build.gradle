@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+apply plugin: 'im.getsocial'
+
 apply plugin: 'com.google.gms.google-services'
 
 import com.android.build.OutputFile
@@ -249,3 +251,6 @@ task copyDownloadableDepsToLibs(type: Copy) {
     into 'libs'
 }
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+getsocial {
+    appId "t0b67K7678dG1"
+}

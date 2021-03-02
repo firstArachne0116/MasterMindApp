@@ -24,6 +24,8 @@ target 'master_mind' do
 
   pod 'RNFBStorage', :path => '../node_modules/@react-native-firebase/storage'
 
+  pod 'RNGetSocial', :path => '../node_modules/getsocial-react-native-sdk'
+
   target 'master_mindTests' do
     inherit! :complete
     # Pods for testing
