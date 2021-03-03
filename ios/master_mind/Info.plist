@@ -44,6 +44,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.651695572708-1orjm5f8qbsor88cgk9dndim27oac0a1</string>
+				<string>getsocial-t0b67K7678dG1</string>
 			</array>
 		</dict>
 	</array>
@@ -53,6 +54,8 @@
 	<string>925477664938524</string>
 	<key>FacebookDisplayName</key>
 	<string>MasterMind</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-9017893946742995~4593810343</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationQueriesSchemes</key>
@@ -61,6 +64,23 @@
 		<string>fb-messenger-share-api</string>
 		<string>fbauth2</string>
 		<string>fbshareextension</string>
+		<string>kakaostory-2.9.0</string>
+		<string>kakaotalk-4.5.0</string>
+		<string>facebook</string>
+		<string>storykompassauth</string>
+		<string>kakaokompassauth</string>
+		<string>fb-messenger-platform-20150714</string>
+		<string>fb-messenger-api20140430</string>
+		<string>fb-messenger-platform-20150128</string>
+		<string>fb-messenger-platform-20150218</string>
+		<string>fb-messenger-platform-20150305</string>
+		<string>kik-share</string>
+		<string>whatsapp</string>
+		<string>kakaolink</string>
+		<string>fb-messenger-api</string>
+		<string>line</string>
+		<string>viber</string>
+		<string>tg</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

@@ -90,21 +90,26 @@ class SessionInvitation extends Component {
   }
 
   componentDidMount() {
-    Invites.getAvailableChannels().then((channels) => {});
+    Invites.getAvailableChannels().then((channels) => {
+      console.log(channels);
+    });
+    console.log('getAvailableChannels');
   }
 
   inviteSocial = (channel) => {
     const linkParams = {
-      custom_key: 'custom_value',
+      $link_name: 'https://bemastermind.gsc.im/3djZy6UGtC',
     };
 
     const customInviteContent = new InviteContent();
     customInviteContent.subject = "I can't stop playing! Get it here";
-    customInviteContent.text = 'Check out this app\n[APP_INVITE_URL]';
+    customInviteContent.text = 'Check out this app [APP_INVITE_URL]';
     customInviteContent.mediaAttachment = MediaAttachment.withImageUrl(
       'https://docs.getsocial.im/images/logo.png',
     );
 
+    customInviteContent.linkParams = linkParams;
+    console.log(customInviteContent);
     Invites.send(
       customInviteContent,
       channel,
@@ -116,16 +121,20 @@ class SessionInvitation extends Component {
       },
       (error) => {
         console.log(
-          `Customized invitation via ${channel} failed, error: ` +
-            error.message,
+          `Customized invitation via ${channel} failed, error: `,
+          error.message,
         );
-        Alert.alert(
-          'Invitation failed',
-          `Maybe you need to install ${capitalize(channel)} on your device.`,
-        );
+        console.log(error);
+        if (channel === 'whatsapp' || channel === 'viber') {
+          Alert.alert(
+            'Invitation failed',
+            `Maybe you need to install ${capitalize(channel)} on your device.`,
+          );
+        } else {
+          Alert.alert('Invitation failed', 'Something went wrong.');
+        }
       },
     );
-    customInviteContent.linkParams = linkParams;
   };
 
   getRoomID = async (uid) => {

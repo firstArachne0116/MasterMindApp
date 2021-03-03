@@ -373,6 +373,12 @@ PODS:
     - boost-for-react-native
     - DoubleConversion
     - glog
+  - GetSocialExtended (7.4.3):
+    - GetSocialExtended/Core (= 7.4.3)
+    - GetSocialExtended/UI (= 7.4.3)
+  - GetSocialExtended/Core (7.4.3)
+  - GetSocialExtended/UI (7.4.3):
+    - GetSocialExtended/Core
   - glog (0.3.5)
   - Google-Mobile-Ads-SDK (7.69.0):
     - GoogleAppMeasurement (~> 7.0)
@@ -642,13 +648,13 @@ PODS:
   - react-native-fbsdk/Share (2.0.0):
     - FBSDKShareKit (~> 7.0)
     - React
-  - react-native-image-picker (2.3.4):
-    - React-Core
+  - react-native-image-picker (2.4.0):
+    - React
   - react-native-safe-area-context (3.1.9):
     - React-Core
   - react-native-splash-screen (3.2.0):
     - React
-  - react-native-viewpager (4.2.2):
+  - react-native-viewpager (4.2.4):
     - React-Core
   - React-RCTActionSheet (0.63.2):
     - React-Core/RCTActionSheetHeaders (= 0.63.2)
@@ -710,7 +716,7 @@ PODS:
     - React-Core (= 0.63.2)
     - React-cxxreact (= 0.63.2)
     - React-jsi (= 0.63.2)
-  - RNCAsyncStorage (1.13.4):
+  - RNCAsyncStorage (1.14.1):
     - React-Core
   - RNCMaskedView (0.1.10):
     - React
@@ -718,38 +724,41 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.8)
     - SDWebImageWebPCoder (~> 0.6.1)
-  - RNFBAdMob (10.7.0):
+  - RNFBAdMob (10.8.1):
     - Firebase/AdMob (~> 7.6.0)
     - PersonalizedAdConsent (~> 1.0.4)
     - React-Core
     - RNFBApp
-  - RNFBApp (10.7.0):
+  - RNFBApp (10.8.1):
     - Firebase/CoreOnly (~> 7.6.0)
     - React-Core
-  - RNFBAuth (10.7.0):
+  - RNFBAuth (10.8.1):
     - Firebase/Auth (~> 7.6.0)
     - React-Core
     - RNFBApp
-  - RNFBDatabase (10.7.0):
+  - RNFBDatabase (10.8.1):
     - Firebase/Database (~> 7.6.0)
     - React-Core
     - RNFBApp
-  - RNFBFirestore (10.7.0):
+  - RNFBFirestore (10.8.1):
     - Firebase/Firestore (~> 7.6.0)
     - React-Core
     - RNFBApp
-  - RNFBStorage (10.7.0):
+  - RNFBStorage (10.8.1):
     - Firebase/Storage (~> 7.6.0)
     - React-Core
     - RNFBApp
-  - RNGestureHandler (1.10.0):
+  - RNGestureHandler (1.10.3):
     - React-Core
+  - RNGetSocial (7.1.0):
+    - GetSocialExtended (= 7.4.3)
+    - React
   - RNGoogleSignin (5.0.0):
     - GoogleSignIn (~> 5.0.0)
     - React-Core
-  - RNScreens (2.17.1):
+  - RNScreens (2.18.1):
     - React-Core
-  - RNSVG (12.1.0):
+  - RNSVG (7.2.1):
     - React
   - RNVectorIcons (7.1.0):
     - React
@@ -828,6 +837,7 @@ DEPENDENCIES:
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
   - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNGetSocial (from `../node_modules/getsocial-react-native-sdk`)
   - "RNGoogleSignin (from `../node_modules/@react-native-community/google-signin`)"
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -860,6 +870,7 @@ SPEC REPOS:
     - Flipper-PeerTalk
     - Flipper-RSocket
     - FlipperKit
+    - GetSocialExtended
     - Google-Mobile-Ads-SDK
     - GoogleAppMeasurement
     - GoogleDataTransport
@@ -966,6 +977,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/storage"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNGetSocial:
+    :path: "../node_modules/getsocial-react-native-sdk"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-community/google-signin"
   RNScreens:
@@ -1007,6 +1020,7 @@ SPEC CHECKSUMS:
   Flipper-RSocket: 602921fee03edacf18f5d6f3d3594ba477f456e5
   FlipperKit: f42987ea58737ac0fb3fbc38f8e703452ba56940
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
+  GetSocialExtended: 7cd33692e47399d749619a1e4acb0e03523aaac1
   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
   Google-Mobile-Ads-SDK: 2f288748a42920d1c744946a460896a95b0e9110
   GoogleAppMeasurement: c542a2feaac9ab98fd074e8f1a02c3585bbfbd47
@@ -1037,10 +1051,10 @@ SPEC CHECKSUMS:
   React-jsinspector: b14e62ebe7a66e9231e9581279909f2fc3db6606
   react-native-contacts: 7b5e16196278636030c3fbbb9505543984b01697
   react-native-fbsdk: 00c15d138bba6d4efa628670886fc58cec858c19
-  react-native-image-picker: c6d75c4ab2cf46f9289f341242b219cb3c1180d3
+  react-native-image-picker: 4e63090db19a528e36c0cc07d1423c8c0cb4c4ef
   react-native-safe-area-context: b6e0e284002381d2ff29fa4fff42b4d8282e3c94
   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
-  react-native-viewpager: ea945e2881ce9a4a8bcdc84de4ec65ff23c90f6e
+  react-native-viewpager: 32259f9d01874abdf42b25cf81a1d78d1aa55582
   React-RCTActionSheet: 910163b6b09685a35c4ebbc52b66d1bfbbe39fc5
   React-RCTAnimation: 9a883bbe1e9d2e158d4fb53765ed64c8dc2200c6
   React-RCTBlob: 39cf0ece1927996c4466510e25d2105f67010e13
@@ -1051,25 +1065,26 @@ SPEC CHECKSUMS:
   React-RCTText: 1b6773e776e4b33f90468c20fe3b16ca3e224bb8
   React-RCTVibration: 4d2e726957f4087449739b595f107c0d4b6c2d2d
   ReactCommon: a0a1edbebcac5e91338371b72ffc66aa822792ce
-  RNCAsyncStorage: 44539979e1f234262d64d3ce86ec21cceb1b2c5e
+  RNCAsyncStorage: fe58eec522885718d6b297b7b658bf87d7ca557b
   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
   RNFastImage: d4870d58f5936111c56218dbd7fcfc18e65b58ff
-  RNFBAdMob: 73e0055083097e5f4cd9ecdc6cb657c914dbf517
-  RNFBApp: d75aa9756bca20df2c902a3f7e11bc276f03c65b
-  RNFBAuth: 77664661b9b75a8af2c194145cc4af52c151f2ac
-  RNFBDatabase: a0a66428ec39a984f0e397c5c58767421c5ffa66
-  RNFBFirestore: a767270f495a44465dda98de30ad4ea4b82f091e
-  RNFBStorage: 3d87e4ee72171f84178d76810eac26118e2b8396
-  RNGestureHandler: 03f587ba19a7e2d9fe48fb9aa6e33ace5fd07dd5
+  RNFBAdMob: 11365dcc37bcadea3afcdf04e1b82906a501d3b6
+  RNFBApp: 02bde3edecf2e9694b908a5d3504e03449980f20
+  RNFBAuth: 16f2b91bf53f398d83a15cff0dd52225967c1d78
+  RNFBDatabase: 21ebccd262d7ab77db2b5c7fe4c6528c6ec259c3
+  RNFBFirestore: 337b96bf5b1b2d32bb9fc4735afd47b16532dde8
+  RNFBStorage: fb33c149ca21187b86f4e32dc35693525b5f2ac0
+  RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
+  RNGetSocial: 3081b836ea926ad631e7352e587fe8f73c808f3a
   RNGoogleSignin: ad866d4c4af2651e36801dd3b7771d7715353499
-  RNScreens: b6c9607e6fe47c1b6e2f1910d2acd46dd7ecea3a
-  RNSVG: ce9d996113475209013317e48b05c21ee988d42e
+  RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
+  RNSVG: 6c8e8c6f9e5a0caf910dd25aa6e4216045426e1d
   RNVectorIcons: bc69e6a278b14842063605de32bec61f0b251a59
   SDWebImage: c666b97e1fa9c64b4909816a903322018f0a9c84
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
   Yoga: 7740b94929bbacbddda59bf115b5317e9a161598
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: e8422ddf456f313802a4d929908b74ca8cae05b5
+PODFILE CHECKSUM: 86b38474f383297f3c834ced446db7e321cd6b76
 
 COCOAPODS: 1.10.1
