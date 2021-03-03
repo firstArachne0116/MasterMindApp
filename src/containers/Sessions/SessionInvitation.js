@@ -137,12 +137,12 @@ class SessionInvitation extends Component {
     );
   };
 
-  getRoomID = async (uid) => {
+  getRoomID = async (uid, lang) => {
     let list = [];
     let name = '';
     const currentUser = auth().currentUser;
-    const room1 = uid + '_' + currentUser.uid;
-    const room2 = currentUser.uid + '_' + uid;
+    const room1 = uid + '_' + currentUser.uid + '_' + lang;
+    const room2 = currentUser.uid + '_' + uid + '_' + lang;
     await firestore()
       .collection('messages')
       .get()
@@ -166,7 +166,7 @@ class SessionInvitation extends Component {
     const {language, type} = this.props.route.params;
     const {navigation} = this.props;
     if (selectedFriend) {
-      const roomId = await this.getRoomID(selectedFriend.uid);
+      const roomId = await this.getRoomID(selectedFriend.uid, language);
       const currentUser = (
         await firestore().collection('users').doc(auth().currentUser.uid).get()
       ).data();

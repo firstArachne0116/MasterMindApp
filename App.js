@@ -15,7 +15,6 @@ import {
   SessionInvitation,
   ChatConversion,
   ChatSettings,
-  SessionPlayed,
   Versus,
   GlobalRankList,
   ProfileStatistics,
@@ -94,7 +93,6 @@ class App extends React.Component {
           />
           <Stack.Screen name="ChatConversion" component={ChatConversion} />
           <Stack.Screen name="ChatSettings" component={ChatSettings} />
-          <Stack.Screen name="SessionPlayed" component={SessionPlayed} />
           <Stack.Screen name="Versus" component={Versus} />
           <Stack.Screen name="GlobalRankList" component={GlobalRankList} />
           <Stack.Screen

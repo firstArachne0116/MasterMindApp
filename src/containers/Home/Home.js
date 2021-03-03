@@ -17,6 +17,7 @@ import {
   LoadingScreen,
 } from '../../components';
 import auth from '@react-native-firebase/auth';
+import messaging from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
 import Languages from '../../Helper/languages.json';
 
@@ -48,8 +49,18 @@ class Home extends Component {
       // this._unsubscribe = this.props.navigation.addListener('focus', () => {
       //   this.getSessionsList();
       // });
+      this.setToken();
     }
   }
+
+  setToken = async () => {
+    const fcmToken = await messaging().getToken();
+    firestore()
+      .collection('users')
+      .doc(auth().currentUser.uid)
+      .update({token: fcmToken});
+    console.log(fcmToken);
+  };
 
   // componentWillUnmount() {
   //   this._unsubscribe();

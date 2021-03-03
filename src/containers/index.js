@@ -3,7 +3,6 @@ export {default as Signup} from './Auth/Signup';
 export {default as Login} from './Auth/Login';
 export {default as ForgetPassword} from './Auth/ForgetPassword';
 export {default as SessionInvitation} from './Sessions/SessionInvitation';
-export {default as SessionPlayed} from './Sessions/SessionPlayed';
 export {default as Versus} from './Sessions/Versus.js';
 export {default as ChatConversion} from './Chat/ChatConversion';
 export {default as ChatSettings} from './Chat/ChatSettings';

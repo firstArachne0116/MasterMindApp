@@ -237,12 +237,6 @@ export default class ActiveSession extends Component {
         }
       });
     switch (language) {
-      case 'en':
-        import('../../constants/wordlist.en.json').then((dic) => {
-          console.log('en', dic);
-          that.dictionary = dic;
-        });
-        break;
       case 'de':
         import('../../constants/wordlist.de.json').then((dic) => {
           console.log('de', dic);
@@ -252,6 +246,12 @@ export default class ActiveSession extends Component {
       case 'hr':
         import('../../constants/wordlist.hr.json').then((dic) => {
           console.log('hr', dic);
+          that.dictionary = dic;
+        });
+        break;
+      default:
+        import('../../constants/wordlist.en.json').then((dic) => {
+          console.log('en', dic);
           that.dictionary = dic;
         });
         break;
