@@ -170,7 +170,8 @@ class SessionInvitation extends Component {
       const currentUser = (
         await firestore().collection('users').doc(auth().currentUser.uid).get()
       ).data();
-      const newRoom = currentUser.uid + '_' + selectedFriend.uid;
+      const newRoom =
+        currentUser.uid + '_' + selectedFriend.uid + '_' + language;
       if (roomId) {
         Alert.alert('', 'You already have a match with this player.');
       } else {
@@ -302,7 +303,9 @@ class SessionInvitation extends Component {
         }
         const friends = querySnapshot.docs
           .map((item) => item.data())
-          .filter((item) => item.user_name.toLowerCase().includes(txt));
+          .filter((item) =>
+            item.user_name.toLowerCase().includes(txt.toLowerCase()),
+          );
         console.log(friends);
         console.log(user);
         that.setState({
