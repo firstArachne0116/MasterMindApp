@@ -92,7 +92,8 @@ class Home extends Component {
         const sessionList = querySnapshot.docs
           .filter(
             (item) =>
-              item.id.startsWith(user.uid) || item.id.endsWith(user.uid),
+              item.id.startsWith(user.uid) ||
+              item.id.slice(0, -3).endsWith(user.uid),
           )
           .map((doc) => {
             return {uid: doc.id, ...doc.data()};
