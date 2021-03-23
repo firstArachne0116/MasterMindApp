@@ -30,6 +30,8 @@ import {
 } from './src/containers';
 
 import admob, {MaxAdContentRating} from '@react-native-firebase/admob';
+import messaging from '@react-native-firebase/messaging';
+import {Platform, TouchableWithoutFeedback} from 'react-native';
 
 admob()
   .setRequestConfiguration({
@@ -47,19 +49,71 @@ admob()
     // Request config successfully set!
   });
 
+async function requestUserPermission() {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  if (enabled) {
+    console.log('Authorization status:', authStatus);
+  }
+}
 const Stack = createStackNavigator();
 
 class App extends React.Component {
+  navigationRef = React.createRef();
+
   constructor(props) {
     super(props);
-    this.state = {
-      user: auth().currentUser,
-    };
   }
+
+  newInvitation = (message) => {
+    if (message.notification.title !== 'You are invited to a new game.') {
+      return;
+    }
+    if (this.navigationRef && this.navigationRef.current) {
+      const room = JSON.parse(message.data.room);
+      this.navigationRef.current.navigate('Versus', room);
+    } else {
+      console.log('Naviation failed');
+    }
+  };
 
   componentDidMount() {
     const currentUser = auth().currentUser;
+    if (Platform.OS === 'ios') {
+      requestUserPermission();
+    }
 
+    // Assume a message-notification contains a "type" property in the data payload of the screen to open
+
+    const that = this;
+    messaging().onNotificationOpenedApp((remoteMessage) => {
+      console.log(
+        'Notification caused app to open from background state:',
+        remoteMessage.notification,
+      );
+
+      that.newInvitation(remoteMessage);
+    });
+
+    messaging().onMessage((message) => {
+      that.newInvitation(message);
+    });
+
+    // Check whether an initial notification is available
+    messaging()
+      .getInitialNotification()
+      .then((remoteMessage) => {
+        if (remoteMessage) {
+          console.log(
+            'Notification caused app to open from quit state:',
+            remoteMessage.notification,
+          );
+          that.newInvitation(remoteMessage);
+        }
+      });
     if (currentUser) {
       firestore()
         .collection('users')
@@ -77,7 +131,7 @@ class App extends React.Component {
   render() {
     const {AppReducer} = this.props;
     return (
-      <NavigationContainer>
+      <NavigationContainer ref={this.navigationRef}>
         <Stack.Navigator headerMode="none">
           <Stack.Screen name="Welcome" component={Welcome} />
           <Stack.Screen name="Login" component={Login} />

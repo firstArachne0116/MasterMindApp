@@ -1,46 +1,46 @@
 {
   "project_info": {
-    "project_number": "651695572708",
-    "firebase_url": "https://master-mind-60620.firebaseio.com",
-    "project_id": "master-mind-60620",
-    "storage_bucket": "master-mind-60620.appspot.com"
+    "project_number": "545561008604",
+    "firebase_url": "https://mastermind-27cff-default-rtdb.firebaseio.com",
+    "project_id": "mastermind-27cff",
+    "storage_bucket": "mastermind-27cff.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:651695572708:android:7a11d40ab31363b0108ef1",
+        "mobilesdk_app_id": "1:545561008604:android:a484017cc81d6555035719",
         "android_client_info": {
           "package_name": "com.dataquest.mastermind"
         }
       },
       "oauth_client": [
         {
-          "client_id": "651695572708-k4dc86oerjlbp0ploin8gkq3gc2ss0ak.apps.googleusercontent.com",
+          "client_id": "545561008604-k2hgva4ojt0pcdplitcf3872c7e74vec.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.dataquest.mastermind",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+            "certificate_hash": "05e519f0111ebbd9aed28d05404176634ff51833"
           }
         },
         {
-          "client_id": "651695572708-5p25rv7j7qeq64efe15e5l0ldv00sjk9.apps.googleusercontent.com",
+          "client_id": "545561008604-lfthj52jmnv37ntif8eteqf8s6gkosrn.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyATSJn3n2qenicDsnjMvUezq4O7VjhiBiA"
+          "current_key": "AIzaSyAKmkEOrCM3jsJLHPPB36dNWD6bm3Jz_pY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "651695572708-5p25rv7j7qeq64efe15e5l0ldv00sjk9.apps.googleusercontent.com",
+              "client_id": "545561008604-lfthj52jmnv37ntif8eteqf8s6gkosrn.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "651695572708-1orjm5f8qbsor88cgk9dndim27oac0a1.apps.googleusercontent.com",
+              "client_id": "545561008604-tsuv15qmhje817cmaodtdun32m0aa16c.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.dataquest.mastermind",

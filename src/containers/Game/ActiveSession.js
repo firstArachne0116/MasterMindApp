@@ -83,7 +83,6 @@ export default class ActiveSession extends Component {
       keywords: ['fashion', 'clothing'],
     });
     this.unsubscribeAdListener = interstitial.onAdEvent((type) => {
-      console.log('ads', type);
       switch (type) {
         case AdEventType.LOADED:
           that.setState({adsLoaded: true});
@@ -136,7 +135,6 @@ export default class ActiveSession extends Component {
                   (cards.length < 7 || oCards.length < 7) &&
                   bag.length !== 0
                 ) {
-                  console.log('take tiles from bag');
                   while (cards.length < 7 && bag.length !== 0) {
                     const randomIndex = getRandomInt(bag.length);
                     cards.push({...bag[randomIndex], status: me.uid});
@@ -236,27 +234,56 @@ export default class ActiveSession extends Component {
             });
         }
       });
-    switch (language) {
-      case 'de':
-        import('../../constants/wordlist.de.json').then((dic) => {
-          console.log('de', dic);
-          that.dictionary = dic;
-        });
-        break;
-      case 'hr':
-        import('../../constants/wordlist.hr.json').then((dic) => {
-          console.log('hr', dic);
-          that.dictionary = dic;
-        });
-        break;
-      default:
-        import('../../constants/wordlist.en.json').then((dic) => {
-          console.log('en', dic);
-          that.dictionary = dic;
-        });
-        break;
-    }
+    that.loadDictionary(language);
   }
+
+  loadDictionary = async (language) => {
+    const that = this;
+    try {
+      switch (language) {
+        case 'bo':
+          that.dictionary = await import('../../constants/wordlist.bo.json');
+          break;
+        case 'csb':
+          that.dictionary = await import('../../constants/wordlist.csb.json');
+          break;
+        case 'de':
+          that.dictionary = await import('../../constants/wordlist.de.json');
+          break;
+        case 'en':
+          that.dictionary = await import('../../constants/wordlist.en.json');
+          break;
+        case 'es':
+          that.dictionary = await import('../../constants/wordlist.es.json');
+          break;
+        case 'fr':
+          that.dictionary = await import('../../constants/wordlist.fr.json');
+          break;
+        case 'hr':
+          that.dictionary = await import('../../constants/wordlist.hr.json');
+          break;
+        case 'it':
+          that.dictionary = await import('../../constants/wordlist.it.json');
+          break;
+        case 'mk':
+          that.dictionary = await import('../../constants/wordlist.mk.json');
+          break;
+        case 'po':
+          that.dictionary = await import('../../constants/wordlist.po.json');
+          break;
+        case 'rs':
+          that.dictionary = await import('../../constants/wordlist.rs.json');
+          break;
+        case 'ru':
+          that.dictionary = await import('../../constants/wordlist.ru.json');
+          break;
+        default:
+          that.dictionary = await import('../../constants/wordlist.en.json');
+      }
+    } catch (e) {
+      that.dictionary = await import('../../constants/wordlist.en.json');
+    }
+  };
 
   componentWillUnmount() {
     const {roomId} = this.props.route.params;
@@ -545,7 +572,6 @@ export default class ActiveSession extends Component {
     });
     that.setState({score});
 
-    console.log(words);
     const wrongWords = [];
     if (words.length) {
       for (const word of words) {
@@ -616,7 +642,6 @@ export default class ActiveSession extends Component {
     });
     const newBag = [...bag];
     if (newCards.length < 7 && newBag.length !== 0) {
-      console.log('take tiles from newBag');
       while (newCards.length < 7 && newBag.length !== 0) {
         const randomIndex = getRandomInt(newBag.length);
         newCards.push({...newBag[randomIndex], status: me.uid});
@@ -863,6 +888,9 @@ export default class ActiveSession extends Component {
               params={params}
               turnId={turnId}
               me={me}
+              onBack={() => {
+                navigation.navigate('Home');
+              }}
             />
             <GameBoxPlayer
               params={params}

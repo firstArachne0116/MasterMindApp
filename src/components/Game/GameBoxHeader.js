@@ -4,10 +4,17 @@ import LinearGradient from 'react-native-linear-gradient';
 import {scale, theme, images} from '../../constants/index.js';
 import languages from '../../Helper/languages.json';
 
-export const GameBoxHeader = ({navigation, params, turnId, me}) => (
+export const GameBoxHeader = ({navigation, params, turnId, me, goBack}) => (
   <View style={styles.content}>
     <View style={styles.header}>
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      <TouchableOpacity
+        onPress={() => {
+          if (goBack) {
+            goBack();
+          } else {
+            navigation.goBack();
+          }
+        }}>
         <Image source={images.goBack} />
       </TouchableOpacity>
       <LinearGradient

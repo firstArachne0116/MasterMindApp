@@ -10,6 +10,11 @@
     "code": "de"
   },
   {
+    "name": "French",
+    "flag": "🇫🇷",
+    "code": "fr"
+  },
+  {
     "name": "Bosnian",
     "flag": "🇧🇦",
     "code": "bo"
@@ -48,5 +53,10 @@
     "name": "Russian",
     "flag": "🇷🇺",
     "code": "ru"
+  },
+  {
+    "name": "Macedonian",
+    "flag": "🇲🇰",
+    "code": "mk"
   }
 ]

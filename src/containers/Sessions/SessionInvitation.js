@@ -161,10 +161,51 @@ class SessionInvitation extends Component {
     return name;
   };
 
-  inviteFriend = async () => {
-    const {selectedFriend} = this.state;
+  invitePlayer = (newRoom, currentUser, player) => {
     const {language, type} = this.props.route.params;
     const {navigation} = this.props;
+    firestore()
+      .collection('messages')
+      .doc(newRoom)
+      .set({
+        id: newRoom,
+        language,
+        type,
+        created_at: new Date(),
+        updated_at: new Date(),
+        end_at: new Date(new Date().getTime() + 48 * 3600 * 1000),
+        players: [
+          {
+            uid: currentUser.uid,
+            full_name: currentUser.full_name,
+            photoURL: currentUser.photoURL,
+            status: 'Invited',
+          },
+          {
+            uid: player.uid,
+            full_name: player.full_name,
+            photoURL: player.photoURL,
+            status: 'Waiting',
+          },
+        ],
+      })
+      .then(() => {
+        database().ref(`board/${newRoom}/tiles`).remove();
+        database().ref(`board/${newRoom}/turnId`).remove();
+        database().ref(`board/${newRoom}/score`).remove();
+
+        Alert.alert(
+          '',
+          'Successfully invited your friend.',
+          [{text: 'OK', onPress: () => navigation.navigate('Home')}],
+          {cancelable: false},
+        );
+      });
+  };
+
+  inviteFriend = async () => {
+    const {selectedFriend} = this.state;
+    const {language} = this.props.route.params;
     if (selectedFriend) {
       const roomId = await this.getRoomID(selectedFriend.uid, language);
       const currentUser = (
@@ -175,49 +216,12 @@ class SessionInvitation extends Component {
       if (roomId) {
         Alert.alert('', 'You already have a match with this player.');
       } else {
-        firestore()
-          .collection('messages')
-          .doc(newRoom)
-          .set({
-            id: newRoom,
-            language,
-            type,
-            created_at: new Date(),
-            updated_at: new Date(),
-            end_at: new Date(new Date().getTime() + 48 * 3600 * 1000),
-            players: [
-              {
-                uid: currentUser.uid,
-                full_name: currentUser.full_name,
-                photoURL: currentUser.photoURL,
-                status: 'Invited',
-              },
-              {
-                uid: selectedFriend.uid,
-                full_name: selectedFriend.full_name,
-                photoURL: selectedFriend.photoURL,
-                status: 'Waiting',
-              },
-            ],
-          })
-          .then(() => {
-            database().ref(`board/${newRoom}/tiles`).remove();
-            database().ref(`board/${newRoom}/turnId`).remove();
-            database().ref(`board/${newRoom}/score`).remove();
-            Alert.alert(
-              '',
-              'Successfully invited your friend.',
-              [{text: 'OK', onPress: () => navigation.navigate('Home')}],
-              {cancelable: false},
-            );
-          });
+        this.invitePlayer(newRoom, currentUser, selectedFriend);
       }
     }
   };
 
   inviteRandomUser = () => {
-    const {language, type} = this.props.route.params;
-    const {navigation} = this.props;
     firestore()
       .collection('messages')
       .get()
@@ -251,42 +255,7 @@ class SessionInvitation extends Component {
             console.log(users.length);
             const randomUser = users[getRandomInt(users.length)];
             const newRoom = currentUser.uid + '_' + randomUser.uid;
-            firestore()
-              .collection('messages')
-              .doc(newRoom)
-              .set({
-                id: newRoom,
-                language,
-                type,
-                created_at: new Date(),
-                updated_at: new Date(),
-                end_at: new Date(new Date().getTime() + 48 * 3600 * 1000),
-                players: [
-                  {
-                    uid: currentUser.uid,
-                    full_name: currentUser.full_name,
-                    photoURL: currentUser.photoURL,
-                    status: 'Invited',
-                  },
-                  {
-                    uid: randomUser.uid,
-                    full_name: randomUser.full_name,
-                    photoURL: randomUser.photoURL,
-                    status: 'Waiting',
-                  },
-                ],
-              })
-              .then(() => {
-                database().ref(`board/${newRoom}/tiles`).remove();
-                database().ref(`board/${newRoom}/turnId`).remove();
-                database().ref(`board/${newRoom}/score`).remove();
-                Alert.alert(
-                  '',
-                  `Successfully invited user ${randomUser.user_name}.`,
-                  [{text: 'OK', onPress: () => navigation.navigate('Home')}],
-                  {cancelable: false},
-                );
-              });
+            this.invitePlayer(newRoom, currentUser, randomUser);
           });
       });
   };
@@ -306,8 +275,6 @@ class SessionInvitation extends Component {
           .filter((item) =>
             item.user_name.toLowerCase().includes(txt.toLowerCase()),
           );
-        console.log(friends);
-        console.log(user);
         that.setState({
           friends: friends.filter((item) => item.uid !== user.uid),
           selectedFriend: friends.find(

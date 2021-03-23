@@ -132,8 +132,6 @@ class Home extends Component {
     const player = room.players.find((pl) => pl.uid !== currentUser.uid);
     const status = player.status.toUpperCase();
 
-    console.log(status);
-
     if (status === 'INVITED') {
       navigation.navigate('Versus', room);
     } else if (status !== 'WAITING') {

@@ -63,3 +63,6 @@ buck-out/
 /package-lock.json
 /yarn.lock
 /ios/Podfile.lock
+
+#service accoutn
+/service-account.json

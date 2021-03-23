@@ -48,7 +48,7 @@ class Welcome extends Component {
     GoogleSignin.configure({
       scopes: ['email'],
       webClientId:
-        '651695572708-5p25rv7j7qeq64efe15e5l0ldv00sjk9.apps.googleusercontent.com',
+        '545561008604-lfthj52jmnv37ntif8eteqf8s6gkosrn.apps.googleusercontent.com',
       offlineAccess: true,
     });
     setTimeout(() => {

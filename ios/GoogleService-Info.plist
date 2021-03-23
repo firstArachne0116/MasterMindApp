@@ -3,23 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>651695572708-1orjm5f8qbsor88cgk9dndim27oac0a1.apps.googleusercontent.com</string>
+	<string>545561008604-tsuv15qmhje817cmaodtdun32m0aa16c.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.651695572708-1orjm5f8qbsor88cgk9dndim27oac0a1</string>
-	<key>ANDROID_CLIENT_ID</key>
-	<string>651695572708-o4utkhdvdllvr419j2jsv66socnafi9v.apps.googleusercontent.com</string>
+	<string>com.googleusercontent.apps.545561008604-tsuv15qmhje817cmaodtdun32m0aa16c</string>
 	<key>API_KEY</key>
-	<string>AIzaSyCvqdb9HZsat8hRlYqPFUl77ezE0qmmG68</string>
+	<string>AIzaSyBEEkdvolDeLEGdacHy_EI7ZKv0aVeYowM</string>
 	<key>GCM_SENDER_ID</key>
-	<string>651695572708</string>
+	<string>545561008604</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.dataquest.mastermind</string>
 	<key>PROJECT_ID</key>
-	<string>master-mind-60620</string>
+	<string>mastermind-27cff</string>
 	<key>STORAGE_BUCKET</key>
-	<string>master-mind-60620.appspot.com</string>
+	<string>mastermind-27cff.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,8 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:651695572708:ios:4ccb12d71d5270c8108ef1</string>
-	<key>DATABASE_URL</key>
-	<string>https://master-mind-60620.firebaseio.com</string>
+	<string>1:545561008604:ios:ec4ab5cd3963f041035719</string>
 </dict>
 </plist>
