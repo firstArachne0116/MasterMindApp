@@ -68,6 +68,12 @@ export default class ActiveSession extends Component {
   unsubscribeAdListener = null;
 
   componentDidMount() {
+    const now = new Date();
+    console.log(
+      'componentDidMount',
+      now.toLocaleTimeString(),
+      now.getMilliseconds(),
+    );
     const {roomId, uid, language} = this.props.route.params;
     const {me} = this.state;
     firestore()
@@ -283,6 +289,12 @@ export default class ActiveSession extends Component {
     } catch (e) {
       that.dictionary = await import('../../constants/wordlist.en.json');
     }
+    const now = new Date();
+    console.log(
+      'dictionary loaded',
+      now.toLocaleTimeString(),
+      now.getMilliseconds(),
+    );
   };
 
   componentWillUnmount() {
@@ -888,7 +900,7 @@ export default class ActiveSession extends Component {
               params={params}
               turnId={turnId}
               me={me}
-              onBack={() => {
+              goBack={() => {
                 navigation.navigate('Home');
               }}
             />

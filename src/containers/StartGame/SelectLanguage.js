@@ -38,6 +38,7 @@ class SelectLanguage extends Component {
     navigation.navigate('SessionInvitation', {
       type: route.params.type,
       language: item.code,
+      player: route.params.palyer,
     });
   };
 

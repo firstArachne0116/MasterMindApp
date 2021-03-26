@@ -26,7 +26,15 @@ class BuyNow extends Component {
     firestore().collection('users').doc(this.state.currentUser.uid).update({
       signed: true,
     });
-    this.props.navigation.navigate('SelectLanguage', {type: 'signed'});
+    if (this.props.route.params && this.props.route.params.player) {
+      this.props.navigation.navigate('SessionInvitation', {
+        type: 'signed',
+        player: this.props.route.params.player,
+        language: this.props.route.params.player.language,
+      });
+    } else {
+      this.props.navigation.navigate('SelectLanguage', {type: 'signed'});
+    }
   };
 
   handleMenu = () => {

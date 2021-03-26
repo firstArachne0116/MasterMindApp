@@ -135,6 +135,12 @@ class Home extends Component {
     if (status === 'INVITED') {
       navigation.navigate('Versus', room);
     } else if (status !== 'WAITING') {
+      const now = new Date();
+      console.log(
+        'before navigate',
+        now.toLocaleTimeString(),
+        now.getMilliseconds(),
+      );
       navigation.navigate('ActiveSession', {
         roomId: room.id,
         uid: player.uid,

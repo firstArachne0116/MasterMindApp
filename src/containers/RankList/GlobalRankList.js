@@ -18,19 +18,16 @@ import {images, theme} from '../../constants';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
+import languages from '../../Helper/languages.json';
+
 class GlobalRankList extends Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: true,
-      langData: [
-        {name: 'English (UK)', code: 'en', flag: '🇬🇧'},
-        {name: 'Croatian', code: 'hr', flag: '🇭🇷'},
-        {name: 'German', code: 'de', flag: '🇩🇪'},
-      ],
+      langData: languages,
       selectedLang: {name: 'English (UK)', code: 'en', flag: '🇬🇧'},
       isLangModal: false,
-      itemToRender: 10,
       isWeekSelect: true,
       data: [],
     };
@@ -51,7 +48,6 @@ class GlobalRankList extends Component {
   }
 
   getGlobalRankList = async () => {
-    const currentUser = auth().currentUser;
     firestore()
       .collection('users')
       .get()
@@ -84,6 +80,23 @@ class GlobalRankList extends Component {
                 }
                 return true;
               });
+            const sessions = (
+              await firestore()
+                .collection('messages')
+                .where('id', 'in', [
+                  userData.uid +
+                    '_' +
+                    auth().currentUser.uid +
+                    '_' +
+                    this.state.selectedLang.code,
+                  auth().currentUser.uid +
+                    '_' +
+                    userData.uid +
+                    '_' +
+                    this.state.selectedLang.code,
+                ])
+                .get()
+            ).docs.length;
             const firstName = userData.full_name.split(' ')[0];
             const lastName = userData.full_name.split(' ')[1];
             return {
@@ -100,6 +113,7 @@ class GlobalRankList extends Component {
               L: scores.filter((score) => score.win === -1).length,
               score: scores.reduce((a, b) => a + b.score, 0),
               cross: false,
+              sessions,
             };
           });
         for (let i = 0; i < users.length; i++) {
@@ -323,15 +337,36 @@ class GlobalRankList extends Component {
                     <Image style={{marginRight: 3}} source={images.star} />
                     <Text style={[styles.score]}>{elem.score}</Text>
                   </View>
-                  <View
-                    style={elem.cross ? styles.rightCross : styles.wrongCross}>
-                    <Image
-                      style={[styles.crossImage]}
-                      source={
-                        elem.cross ? images.rightCross : images.wrongCross
-                      }
-                    />
-                  </View>
+                  {elem.uid !== auth().currentUser.uid &&
+                    (elem.sessions ? (
+                      <View style={styles.rightCross}>
+                        <Image
+                          style={[styles.crossImage]}
+                          source={images.rightCross}
+                        />
+                      </View>
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.wrongCross}
+                        onPress={() => {
+                          console.log('to SelectGameType', {
+                            uid: elem.uid,
+                            name: elem.name,
+                          });
+                          navigation.navigate('SelectGameType', {
+                            player: {
+                              uid: elem.uid,
+                              name: elem.name,
+                              language: selectedLang.code,
+                            },
+                          });
+                        }}>
+                        <Image
+                          style={[styles.crossImage]}
+                          source={images.wrongCross}
+                        />
+                      </TouchableOpacity>
+                    ))}
                 </View>
               );
             })}

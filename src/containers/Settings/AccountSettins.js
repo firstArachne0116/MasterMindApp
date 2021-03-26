@@ -20,7 +20,7 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ScreenContainer} from '../../components';
-import {scale, theme, images, getPlatformURI} from '../../constants';
+import {scale, theme, images} from '../../constants';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -126,14 +126,9 @@ class AccountSettings extends Component {
         let path = await this.getPlatformPath(response).value;
         let fileName = await this.getFileName(response.fileName, path);
 
-        await this.uploadImageToStorage(path, fileName);
-        const photoURL = await getPlatformURI('assets/' + fileName);
-        await this.setState({imagePath: photoURL.uri});
-        auth().currentUser.updateProfile({photoURL: photoURL.uri});
-        firestore()
-          .collection('users')
-          .doc(auth().currentUser.uid)
-          .update({photoURL: photoURL.uri});
+        this.uploadImageToStorage(path, fileName);
+        // await this.setState({imagePath: photoURL.uri});
+        // auth().currentUser.updateProfile({photoURL: photoURL.uri});
       }
     });
   };
@@ -158,19 +153,22 @@ class AccountSettings extends Component {
     task
       .then(async () => {
         console.log('Image uploaded to the bucket!');
-        const imagePath = await storage()
+        await storage()
           .ref(`assets/${name}`)
-          .getDownloadURL();
-        console.log(imagePath);
-        that.setState({
-          isLoading: false,
-          status: 'Image uploaded successfully',
-          imagePath,
-        });
-        firestore()
-          .collection('users')
-          .doc(this.state.currentUser.uid)
-          .update({photoURL: imagePath});
+          .getDownloadURL()
+          .then((imagePath) => {
+            console.log(imagePath);
+            that.setState({
+              isLoading: false,
+              status: 'Image uploaded successfully',
+              imagePath,
+            });
+            firestore()
+              .collection('users')
+              .doc(this.state.uid)
+              .update({photoURL: imagePath});
+            auth().currentUser.updateProfile({photoURL: imagePath});
+          });
       })
       .catch((e) => {
         this.setState({isLoading: false, status: 'Something went wrong'});

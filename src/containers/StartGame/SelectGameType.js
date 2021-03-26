@@ -30,15 +30,35 @@ class SelectGameType extends Component {
 
   handleUnsigned = () => {
     const {navigation} = this.props;
-    navigation.navigate('SelectLanguage', {type: 'unsigned'});
+    if (this.props.route.params && this.props.route.params.player) {
+      navigation.navigate('SessionInvitation', {
+        type: 'unsigned',
+        player: this.props.route.params.player,
+        language: this.props.route.params.player.language,
+      });
+    } else {
+      navigation.navigate('SelectLanguage', {type: 'unsigned'});
+    }
   };
 
   handleSigned = () => {
     const {navigation} = this.props;
     if (this.state.userSigned) {
-      navigation.navigate('SelectLanguage', {type: 'signed'});
+      if (this.props.route.params && this.props.route.params.player) {
+        navigation.navigate('SessionInvitation', {
+          type: 'signed',
+          player: this.props.route.params.player,
+          language: this.props.route.params.player.language,
+        });
+      } else {
+        navigation.navigate('SelectLanguage', {type: 'signed'});
+      }
     } else {
-      navigation.navigate('BuyNow');
+      navigation.navigate('BuyNow', {
+        player: this.props.route.params
+          ? this.props.route.params.player
+          : undefined,
+      });
     }
   };
 

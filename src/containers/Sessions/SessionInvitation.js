@@ -93,7 +93,20 @@ class SessionInvitation extends Component {
     Invites.getAvailableChannels().then((channels) => {
       console.log(channels);
     });
-    console.log('getAvailableChannels');
+    const {params} = this.props.route;
+    if (params && params.player) {
+      console.log(params.player);
+      this.handleSearchFriend(params.player.name);
+      firestore()
+        .collection('users')
+        .doc(params.player.uid)
+        .get()
+        .then((snap) => {
+          this.setState({selectedFriend: snap.data()}, () => {
+            this.inviteFriend();
+          });
+        });
+    }
   }
 
   inviteSocial = (channel) => {
@@ -261,6 +274,7 @@ class SessionInvitation extends Component {
   };
 
   handleSearchFriend = (txt) => {
+    console.log(txt);
     const user = auth().currentUser;
     const that = this;
     firestore()
