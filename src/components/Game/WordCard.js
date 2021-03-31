@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     left: 4,
-    fontSize: 12,
+    fontSize: 14,
     color: theme.colors.brown,
     fontFamily: theme.fonts.redHatMedium,
   },
