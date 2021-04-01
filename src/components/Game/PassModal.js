@@ -3,22 +3,44 @@ import {TouchableOpacity, Text, StyleSheet, Image, View} from 'react-native';
 import Modal from 'react-native-modal';
 import LinearGradient from 'react-native-linear-gradient';
 import {images, scale, theme} from '../../constants';
-const PassModal = ({isModalVisible, handlePass, handleCancel}) => {
+const PassModal = ({
+  isPassModalVisible,
+  isSwapModalVisible,
+  handlePass,
+  handleSwap,
+  handleCancel,
+}) => {
   return (
     <Modal
-      isVisible={isModalVisible}
+      isVisible={isPassModalVisible || isSwapModalVisible}
       animationIn={'zoomIn'}
       animationOut={'zoomOut'}>
       <View style={styles.container}>
         <Image source={images.monster_mind} style={styles.image} />
-        <Text style={styles.info}>
-          Are you sure you want to pass this move ?
-        </Text>
+        {!!isPassModalVisible && (
+          <Text style={styles.info}>
+            Are you sure you want to pass this move ?
+          </Text>
+        )}
+        {!!isSwapModalVisible && (
+          <Text style={styles.info}>Are you sure you want to swap ?</Text>
+        )}
         <LinearGradient
           colors={[theme.colors.sky, theme.colors.sky]}
           style={styles.gradient}>
-          <TouchableOpacity onPress={() => handlePass()}>
-            <Text style={styles.gradientText}>Yes, Pass</Text>
+          <TouchableOpacity
+            onPress={() => {
+              if (isPassModalVisible) {
+                handlePass();
+              }
+              if (isSwapModalVisible) {
+                handleSwap();
+              }
+            }}>
+            <Text style={styles.gradientText}>
+              Yes, {isPassModalVisible ? 'Pass' : ''}
+              {isSwapModalVisible ? 'Swap' : ''}
+            </Text>
           </TouchableOpacity>
         </LinearGradient>
 

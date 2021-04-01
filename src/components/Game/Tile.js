@@ -22,7 +22,19 @@ const getUnFillClassName = (w) => {
   return styles.tile;
 };
 
-export const Tile = ({tile, onSelectTile, onReturnCard, success}) => {
+export const Tile = ({
+  tile,
+  onSelectTile,
+  onReturnCard,
+  success,
+  lastWordTiles,
+}) => {
+  const isLastWordTile = !!lastWordTiles.find(
+    (wordTile) => wordTile.row === tile.row && wordTile.col === tile.col,
+  );
+  if (isLastWordTile) {
+    console.log(isLastWordTile);
+  }
   return (
     <View underlayColor="transparent">
       <>
@@ -41,7 +53,9 @@ export const Tile = ({tile, onSelectTile, onReturnCard, success}) => {
           <LinearGradient
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
-            colors={['#F6E5B0', '#E6BC5B']}
+            colors={
+              isLastWordTile ? ['#FFEE00', '#FFEE00'] : ['#F6E5B0', '#E6BC5B']
+            }
             style={[styles.tile, styles.fillTile]}>
             <Text style={[styles.fillTitle, styles.value]}>{tile.value}</Text>
             <Text style={styles.fillTitle}>{tile.letter}</Text>
@@ -140,6 +154,9 @@ const styles = StyleSheet.create({
   },
   newTile: {
     backgroundColor: '#A3FF00',
+  },
+  lastTile: {
+    backgroundColor: '#FFFF00',
   },
   cardTile: {
     backgroundColor: '#FFD819',

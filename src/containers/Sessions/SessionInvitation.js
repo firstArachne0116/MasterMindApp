@@ -40,7 +40,7 @@ class SessionInvitation extends Component {
           icon: images.girl,
           cardImage: images.inviteFriend,
           handler: () => {
-            Alert.alert('Please search and select your MasterMIND friend.');
+            this.searchRef.current.focus();
           },
         },
         {
@@ -86,6 +86,7 @@ class SessionInvitation extends Component {
       selectedFriend: null,
       searchTxt: '',
     };
+    this.searchRef = React.createRef();
     this.timerID = null;
   }
 
@@ -315,7 +316,9 @@ class SessionInvitation extends Component {
   };
 
   selectFriend = (ele) => {
-    this.setState({selectedFriend: ele});
+    this.setState({selectedFriend: ele}, () => {
+      this.inviteFriend();
+    });
   };
 
   render() {
@@ -339,6 +342,7 @@ class SessionInvitation extends Component {
               />
               <TextInput
                 style={styles.input}
+                ref={this.searchRef}
                 underlineColorAndroid="transparent"
                 onChangeText={(txt) => this.handleChangeSearch(txt)}
                 placeholder="Search"

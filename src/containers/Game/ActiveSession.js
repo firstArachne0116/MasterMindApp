@@ -44,7 +44,8 @@ export default class ActiveSession extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isModalVisible: false,
+      isPassModalVisible: false,
+      isSwapModalVisible: false,
       me: auth().currentUser,
       data: defineMatrix(),
       tiles: [],
@@ -60,6 +61,11 @@ export default class ActiveSession extends Component {
       passedMe: 0,
       passedYou: 0,
       adsLoaded: false,
+      words: [],
+      lastWordTiles: [],
+      wordTiles: [],
+      score: 0,
+      lastSession: '',
     };
   }
   onTurnId = null;
@@ -124,6 +130,9 @@ export default class ActiveSession extends Component {
                   .ref(`board/${roomId}/tiles`)
                   .set(initialBag(language));
               } else {
+                if (!that.dictionary) {
+                  that.loadDictionary(language);
+                }
                 const allTiles = snapshot.val();
                 const cards = allTiles.filter((tile) => tile.status === me.uid);
                 const oCards = allTiles.filter((tile) => tile.status === uid);
@@ -164,10 +173,15 @@ export default class ActiveSession extends Component {
               let youTotal = 0;
               let passedMe = 0;
               let passedYou = 0;
+              let lastSession = '';
+              let lastWordTiles = [];
               if (values !== null) {
                 values.map((data) => {
                   if (data.id === me.uid) {
                     meTotal = data.score;
+                    if (data.lastWordTiles) {
+                      lastWordTiles = data.lastWordTiles;
+                    }
                     if (data.passed) {
                       passedMe = data.passed;
                     }
@@ -209,7 +223,12 @@ export default class ActiveSession extends Component {
                       );
                     }
                   } else {
+                    console.log(data);
                     youTotal = data.score;
+                    lastSession = data.lastSession;
+                    if (data.lastWordTiles) {
+                      lastWordTiles = data.lastWordTiles;
+                    }
                     if (data.passed) {
                       passedYou = data.passed;
                     }
@@ -231,19 +250,27 @@ export default class ActiveSession extends Component {
                     },
                   ]);
               }
+              console.log(lastWordTiles);
               this.setState({
                 totalMe: meTotal,
                 totalYou: youTotal,
                 passedMe,
                 passedYou,
+                lastSession,
+                lastWordTiles,
               });
             });
         }
       });
-    that.loadDictionary(language);
   }
 
   loadDictionary = async (language) => {
+    const now = new Date();
+    console.log(
+      'dictionary loading started',
+      now.toLocaleTimeString(),
+      now.getMilliseconds(),
+    );
     const that = this;
     try {
       switch (language) {
@@ -289,11 +316,11 @@ export default class ActiveSession extends Component {
     } catch (e) {
       that.dictionary = await import('../../constants/wordlist.en.json');
     }
-    const now = new Date();
+    const now1 = new Date();
     console.log(
       'dictionary loaded',
-      now.toLocaleTimeString(),
-      now.getMilliseconds(),
+      now1.toLocaleTimeString(),
+      now1.getMilliseconds(),
     );
   };
 
@@ -316,11 +343,17 @@ export default class ActiveSession extends Component {
     }
   }
 
-  toggleModal = () => {
+  showPassModal = () => {
     if (this.state.turnId !== this.state.me.uid) {
       return;
     }
-    this.setState({isModalVisible: !this.state.isModalVisible});
+    this.setState({isPassModalVisible: true});
+  };
+  showSwapModal = () => {
+    if (this.state.turnId !== this.state.me.uid) {
+      return;
+    }
+    this.setState({isSwapModalVisible: true});
   };
 
   handleSelectCard = (char) => {
@@ -408,6 +441,7 @@ export default class ActiveSession extends Component {
     let word = '',
       score = 0,
       mul = 1;
+    const wordTiles = [];
     for (i = t; i <= b; i++) {
       word += data[i][card.col].letter;
       score +=
@@ -418,9 +452,10 @@ export default class ActiveSession extends Component {
       if (data[i][card.col].w && data[i][card.col].w % 2 === 0) {
         mul *= data[i][card.col].w / 2 + 1;
       }
+      wordTiles.push({row: i, col: card.col});
     }
     score *= mul;
-    return {word, score};
+    return {word, score, wordTiles};
   };
 
   getHorizontalWord = (data, card) => {
@@ -440,7 +475,9 @@ export default class ActiveSession extends Component {
     let word = '',
       score = 0,
       mul = 1;
+    const wordTiles = [];
     for (i = l; i <= r; i++) {
+      wordTiles.push({row: card.row, col: i});
       word += data[card.row][i].letter;
       score +=
         parseInt(data[card.row][i].value, 10) *
@@ -452,7 +489,7 @@ export default class ActiveSession extends Component {
       }
     }
     score *= mul;
-    return {word, score};
+    return {word, score, wordTiles};
   };
 
   checkWord = () => {
@@ -559,6 +596,7 @@ export default class ActiveSession extends Component {
     }
 
     const words = [];
+    let wordTiles = [];
     let score = 0;
 
     cards.map((card) => {
@@ -570,6 +608,7 @@ export default class ActiveSession extends Component {
         ) {
           words.push(word.word);
           score += word.score;
+          wordTiles = wordTiles.concat(word.wordTiles);
         }
 
         word = that.getHorizontalWord(renderData, card);
@@ -578,6 +617,7 @@ export default class ActiveSession extends Component {
           words.filter((w) => w === word.word).length === 0
         ) {
           words.push(word.word);
+          wordTiles = wordTiles.concat(word.wordTiles);
           score += word.score;
         }
       }
@@ -600,6 +640,8 @@ export default class ActiveSession extends Component {
       this.setState({reason: 'Please place more tiles'});
       return false;
     }
+    console.log(wordTiles);
+    this.setState({words, wordTiles});
     return true;
   };
 
@@ -624,6 +666,8 @@ export default class ActiveSession extends Component {
       totalYou,
       totalMe,
       passedYou,
+      words,
+      wordTiles,
     } = this.state;
     if (turnId !== me.uid) {
       return;
@@ -665,6 +709,14 @@ export default class ActiveSession extends Component {
         id: me.uid,
         score: totalMe + totalScore,
         passed: 0,
+        lastSession:
+          me.full_name +
+          ' played ' +
+          words.join(', ').toLowerCase() +
+          ' and got ' +
+          totalScore +
+          ' points',
+        lastWordTiles: wordTiles,
       },
       {
         id: uid,
@@ -752,7 +804,8 @@ export default class ActiveSession extends Component {
         selected: false,
         letter: card.value === 0 ? ' ' : card.letter,
       })),
-      isModalVisible: false,
+      isPassModalVisible: false,
+      isSwapModalVisible: false,
     });
   };
 
@@ -876,7 +929,8 @@ export default class ActiveSession extends Component {
 
   render() {
     const {
-      isModalVisible,
+      isPassModalVisible,
+      isSwapModalVisible,
       me,
       data,
       cards,
@@ -885,6 +939,8 @@ export default class ActiveSession extends Component {
       success,
       totalMe,
       totalYou,
+      lastSession,
+      lastWordTiles,
     } = this.state;
     const {navigation} = this.props;
     const {params} = this.props.route;
@@ -900,6 +956,7 @@ export default class ActiveSession extends Component {
               params={params}
               turnId={turnId}
               me={me}
+              lastSession={lastSession}
               goBack={() => {
                 navigation.navigate('Home');
               }}
@@ -916,6 +973,7 @@ export default class ActiveSession extends Component {
             style={styles.scrollView}>
             <GameBoxes
               data={data}
+              lastWordTiles={lastWordTiles}
               tiles={tiles}
               cards={cards}
               handleSelectTile={this.handleSelectTile}
@@ -926,18 +984,23 @@ export default class ActiveSession extends Component {
           <GameBoxFooter
             cards={cards}
             handleSubmit={this.handleSubmit}
-            toggleModal={this.toggleModal}
+            handlePass={this.showPassModal}
             handleSelectCard={this.handleSelectCard}
             handleReplaceCard={this.handleReplaceCard}
             handleClear={this.handleClear}
-            handleSwap={this.handleSwap}
+            handleSwap={this.showSwapModal}
             tilesLeft={this.state.bag.length}
           />
           <PassModal
-            isModalVisible={isModalVisible}
+            isPassModalVisible={isPassModalVisible}
+            isSwapModalVisible={isSwapModalVisible}
             handlePass={() => this.handlePass()}
+            handleSwap={() => this.handleSwap()}
             handleCancel={() =>
-              this.setState({isModalVisible: !this.state.isModalVisible})
+              this.setState({
+                isPassModalVisible: false,
+                isSwapModalVisible: false,
+              })
             }
           />
         </SafeAreaView>

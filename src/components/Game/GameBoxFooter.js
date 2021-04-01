@@ -2,7 +2,6 @@ import React from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {isIphoneX} from 'react-native-iphone-x-helper';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {theme} from '../../constants/index.js';
@@ -11,7 +10,7 @@ import {WordCard} from './WordCard';
 export const GameBoxFooter = ({
   handleClear,
   handleSubmit,
-  toggleModal,
+  handlePass,
   cards,
   handleSelectCard,
   handleReplaceCard,
@@ -31,10 +30,10 @@ export const GameBoxFooter = ({
       end={{x: 1, y: 1}}
       colors={[theme.colors.sky, theme.colors.pink1, theme.colors.pink2]}
       style={styles.footerContainer}>
-      <View style={styles.footrIconView}>
+      <View style={styles.footerIconView}>
         <TouchableOpacity
           style={styles.footerIcon}
-          onPress={() => toggleModal()}>
+          onPress={() => handlePass()}>
           <MaterialCommunityIcons
             name="arrow-collapse-right"
             size={20}
@@ -43,19 +42,19 @@ export const GameBoxFooter = ({
         </TouchableOpacity>
         <Text style={styles.footerText}>Pass</Text>
       </View>
-      <View style={styles.footrIconView}>
+      <View style={styles.footerIconView}>
         <TouchableOpacity style={styles.footerIcon} onPress={handleClear}>
           <AntDesign name="arrowdown" size={20} color={theme.colors.white} />
         </TouchableOpacity>
         <Text style={styles.footerText}>Clear</Text>
       </View>
-      <View style={styles.footrIconView}>
+      <View style={styles.footerIconView}>
         <TouchableOpacity style={styles.footerIcon} onPress={handleSwap}>
           <AntDesign name="swap" size={20} color={theme.colors.white} />
         </TouchableOpacity>
         <Text style={styles.footerText}>Swap</Text>
       </View>
-      <View style={styles.footrIconView}>
+      <View style={styles.footerIconView}>
         <View style={styles.footerIcon}>
           <Text style={theme.white}>{tilesLeft}</Text>
         </View>
@@ -94,14 +93,14 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     flexDirection: 'row',
-    paddingTop: 11,
+    paddingTop: 8,
     paddingHorizontal: 13,
   },
-  footrIconView: {width: '13%', alignItems: 'center'},
+  footerIconView: {width: '13%', alignItems: 'center'},
   footerIcon: {
-    width: 33,
-    height: 33,
-    borderRadius: 16.5,
+    width: 36,
+    height: 36,
+    borderRadius: 20,
     borderColor: theme.colors.white,
     borderWidth: 2,
     alignItems: 'center',
@@ -109,8 +108,8 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: theme.colors.white,
-    fontSize: 8,
-    marginTop: 5,
+    fontSize: 10,
+    marginTop: 3,
     fontFamily: theme.fonts.redHatMedium,
   },
   submitButton: {

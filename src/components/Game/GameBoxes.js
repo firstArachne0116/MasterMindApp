@@ -4,7 +4,12 @@ import {Tile} from './Tile';
 
 class GameBox extends Component {
   renderRow = (row, index) => {
-    const {handleSelectTile, handleReturnCard, success} = this.props;
+    const {
+      handleSelectTile,
+      handleReturnCard,
+      success,
+      lastWordTiles,
+    } = this.props;
     if (row.length > 0) {
       return (
         <View style={styles.innerWrapper} key={index}>
@@ -12,6 +17,7 @@ class GameBox extends Component {
             <Tile
               key={'tile' + tileIndex}
               tile={tile}
+              lastWordTiles={lastWordTiles}
               onSelectTile={handleSelectTile}
               onReturnCard={handleReturnCard}
               success={success}

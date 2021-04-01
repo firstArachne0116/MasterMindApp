@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
@@ -15,23 +16,21 @@ class Notification extends Component {
       email_message_flag: false,
       push_move_flag: false,
       email_move_flag: false,
+      uid: auth().currentUser.uid,
     };
   }
 
-  async componentDidMount() {
-    const user = await auth().currentUser;
-    await firestore()
+  componentDidMount() {
+    const user = auth().currentUser;
+    firestore()
       .collection('notifications')
       .doc(user.uid)
       .get()
       .then((res) => {
-        const data = res._data;
+        const data = res.data();
         this.setState(data);
       });
-    this.setState({uid: user.uid});
   }
-
-  componentDidUpdate(prevProps) {}
 
   onHandleSwitch = (key) => {
     const {uid} = this.state;
@@ -59,7 +58,7 @@ class Notification extends Component {
         renderInsideCircle={() => <View style={styles.switchInsideCircle} />}
         switchWidthMultiplier={2.5}
         onValueChange={() => this.onHandleSwitch(key)}
-        value={this.state[key]}
+        value={!this.state[key]}
       />
     );
   };

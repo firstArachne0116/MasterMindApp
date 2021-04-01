@@ -4,7 +4,14 @@ import LinearGradient from 'react-native-linear-gradient';
 import {scale, theme, images} from '../../constants/index.js';
 import languages from '../../Helper/languages.json';
 
-export const GameBoxHeader = ({navigation, params, turnId, me, goBack}) => (
+export const GameBoxHeader = ({
+  navigation,
+  params,
+  turnId,
+  me,
+  goBack,
+  lastSession,
+}) => (
   <View style={styles.content}>
     <View style={styles.header}>
       <TouchableOpacity
@@ -27,7 +34,11 @@ export const GameBoxHeader = ({navigation, params, turnId, me, goBack}) => (
           {languages.find((lang) => lang.code === params.language).flag}
         </Text>
         <Text style={styles.turnText}>
-          {turnId === me.uid ? 'Your turn to make a move' : "Opponent's turn"}
+          {turnId === me.uid
+            ? lastSession
+              ? lastSession
+              : 'Your turn to make a move'
+            : "Opponent's turn"}
         </Text>
       </LinearGradient>
       <TouchableOpacity
@@ -60,7 +71,9 @@ const styles = StyleSheet.create({
     width: theme.SCREENWIDTH / 1.6,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    minHeight: 40,
   },
   countryFlag: {
     width: 20,
@@ -72,6 +85,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginLeft: 10,
     fontFamily: theme.fonts.redHatMedium,
+    width: '85%',
   },
   chatIcon: {
     width: 28,
