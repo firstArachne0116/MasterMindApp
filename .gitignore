@@ -1,0 +1,4 @@
+/.firebase
+
+/functions/node_modules
+/functions/package-lock.json
