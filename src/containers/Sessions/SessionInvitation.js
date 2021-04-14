@@ -386,12 +386,7 @@ class SessionInvitation extends Component {
                     </TouchableOpacity>
                   );
                 })}
-                <TouchableOpacity
-                  onPress={() => {
-                    this.inviteFriend();
-                  }}
-                  key="btn0"
-                  style={styles.cardView}>
+                <TouchableOpacity key="btn0" style={styles.cardView}>
                   <Image source={images.inviteFriend} style={styles.card} />
                   <View
                     style={[

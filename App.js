@@ -31,7 +31,7 @@ import {
 
 import admob, {MaxAdContentRating} from '@react-native-firebase/admob';
 import messaging from '@react-native-firebase/messaging';
-import {Platform, TouchableWithoutFeedback} from 'react-native';
+import {Platform} from 'react-native';
 
 admob()
   .setRequestConfiguration({
